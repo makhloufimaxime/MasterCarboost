@@ -5,6 +5,7 @@ $(document).ready(function(){
 });
 
 function renderNavBar(){
+	console.log("Script.js console log token : ");
 	console.log(getToken());
 	console.log("Function renderHeader()");
 	if(getToken()){
@@ -22,8 +23,12 @@ function renderNavBar(){
 	}
 }
 
+function token(){
+	return window.localStorage.getItem("carboost-token")
+}
+
 function getToken(){
-	return parseJwt(window.localStorage.getItem("carboost-token"));
+	return parseJwt(token());
 }
 
 function setToken(token){
@@ -31,7 +36,7 @@ function setToken(token){
 }
 
 function deleteToken(){
-
+	window.localStorage.removeItem("carboost-token");
 }
 
 function parseJwt (token) {

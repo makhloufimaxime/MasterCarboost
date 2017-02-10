@@ -185,7 +185,31 @@ apiRoutes.get('/users', function(req, res) {
       res.json({ success: false, message: 'No user found.' });
     }
     else{
-      res.json(data);
+      res.json({ success: true, users: data });
+    }
+  });
+});
+
+apiRoutes.get('/users/students', function(req, res) {
+  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 0 AND Users.class = Classes.id";
+  connection.query(query, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'No user found.' });
+    }
+    else{
+      res.json({ success: true, users: data });
+    }
+  });
+});
+
+apiRoutes.get('/users/teachers', function(req, res) {
+  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 1 AND Users.email = Classes.teacher";
+  connection.query(query, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'No user found.' });
+    }
+    else{
+      res.json({ success: true, users: data });
     }
   });
 });
@@ -201,7 +225,7 @@ apiRoutes.get('/users/:email', function(req, res) {
       res.json({ success: false, message: 'User not found.' });
     }
     else{
-      res.json(data);
+      res.json({ success: true, user: data });
     }
   });
 });
@@ -326,13 +350,13 @@ apiRoutes.post('/classes', function(req, res) {
 
 // route to return all classes (GET http://localhost:8080/api/classes)
 apiRoutes.get('/classes', function(req, res) {
-  var query = "SELECT * FROM Classes";
+  var query = "SELECT a.id, a.name, a.teacher, b.firstname, b.lastname, count(c.email) as students FROM Classes a, Users b, Users c WHERE a.teacher = b.email AND c.class = a.id GROUP BY a.id";
   connection.query(query, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'No class found.' });
     }
     else{
-      res.json(data);
+      res.json({ success: true, classes: data });
     }
   });
 });
@@ -341,14 +365,14 @@ apiRoutes.get('/classes', function(req, res) {
 apiRoutes.get('/classes/:id', function(req, res) {
   var id = req.params.id;
 
-  var query = "SELECT * FROM Classes WHERE id = ?";
+  var query = "SELECT a.id, a.name, a.teacher, b.firstname, b.lastname, count(c.email) as students FROM Classes a, Users b, Users c WHERE a.teacher = b.email AND c.class = a.id AND a.id = ?";
   var queryParams = [id];
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'Class not found.' });
     }
     else{
-      res.json(data);
+      res.json({ success: true, class: data });
     }
   });
 });
@@ -462,7 +486,7 @@ apiRoutes.get('/skills', function(req, res) {
       res.json({ success: false, message: 'No skill found.' });
     }
     else{
-      res.json(data);
+      res.json({ success: true, skills: data });
     }
   });
 });
@@ -478,7 +502,7 @@ apiRoutes.get('/skills/:id', function(req, res) {
       res.json({ success: false, message: 'Skill not found.' });
     }
     else{
-      res.json(data);
+      res.json({ success: true, skill: data });
     }
   });
 });

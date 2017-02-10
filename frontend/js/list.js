@@ -10,14 +10,17 @@ function isTeacher(){
 	var isTeacher = decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
 	switch(isTeacher) {
 		case "Student":
-			state = 0;
-			break;
+		state = 0;
+		break;
 		case "Teacher":
-			state = 1;
-			break;
+		state = 1;
+		break;
+		case "Class":
+		state = 2;
+		break;
 		default:
-			sate = 2;
-	} 
+		sate = 2;
+	}
 }
 
 function renderSideBar(){
@@ -25,19 +28,24 @@ function renderSideBar(){
 	var sideBar = "<ul class=\"nav nav-sidebar\">";
 	switch(state) {
 		case 0:
-			sideBar = sideBar + "<li class=\"active\"><a href=\"list.html?list=Student\">Student<span class=\"sr-only\">(current)</span></a></li>";
-			sideBar = sideBar + "<li><a href=\"list.html?list=Teacher\">Teacher</a></li>";
-			sideBar = sideBar + "<li><a href=\"list.html?list=Class\">Class</a></li>";
-			break;
+		sideBar = sideBar + "<li class=\"active\"><a href=\"list.html?list=Student\">Student<span class=\"sr-only\">(current)</span></a></li>";
+		sideBar = sideBar + "<li><a href=\"list.html?list=Teacher\">Teacher</a></li>";
+		sideBar = sideBar + "<li><a href=\"list.html?list=Class\">Class</a></li>";
+		break;
 		case 1:
-			sideBar = sideBar + "<li><a href=\"list.html?list=Student\">Students</a></li>";
-			sideBar = sideBar + "<li class=\"active\"><a href=\"list.html?list=Teacher\">Teachers<span class=\"sr-only\">(current)</span></a></li>";
-			sideBar = sideBar + "<li><a href=\"list.html?list=Class\">Class</a></li>";
-			break;
+		sideBar = sideBar + "<li><a href=\"list.html?list=Student\">Students</a></li>";
+		sideBar = sideBar + "<li class=\"active\"><a href=\"list.html?list=Teacher\">Teachers<span class=\"sr-only\">(current)</span></a></li>";
+		sideBar = sideBar + "<li><a href=\"list.html?list=Class\">Class</a></li>";
+		break;
+		case 2:
+		sideBar = sideBar + "<li><a href=\"list.html?list=Student\">Students</a></li>";
+		sideBar = sideBar + "<li><a href=\"list.html?list=Teacher\">Teacher</a></li>";
+		sideBar = sideBar + "<li class=\"active\"><a href=\"list.html?list=Class\">Class<span class=\"sr-only\">(current)</span></a></li>";
+		break;
 		default:
-			sideBar = sideBar + "<li><a href=\"list.html?list=Student\">Students</a></li>";
-			sideBar = sideBar + "<li><a href=\"list.html?list=Teacher\">Teacher</a></li>";
-			sideBar = sideBar + "<li class=\"active\"><a href=\"list.html?list=Class\">Class<span class=\"sr-only\">(current)</span></a></li>";
+		sideBar = sideBar + "<li><a href=\"list.html?list=Student\">Students</a></li>";
+		sideBar = sideBar + "<li><a href=\"list.html?list=Teacher\">Teacher</a></li>";
+		sideBar = sideBar + "<li><a href=\"list.html?list=Class\">Class</a></li>";
 	}
 	sideBar = sideBar + "</ul>";
 	$('#sideBar').html(sideBar);
@@ -48,47 +56,120 @@ function renderElement(){
 	renderSideBar();
 	switch(state) {
 		case 0:
-			var table = "<h2 class=\"sub-header\">List of the students</h2>";
-			table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Last Name</th><th>First Name</th><th>Class</th></tr></thead>";
-			table = table + "<tbody>";
-			for (var i = 1; i <= 150; i++){
-				table = table +  "<tr>";
-				table = table + "<td>" + i + "</td>";
-				table = table + "<td><a href=\"student.html?student=LastName" + i + "\">Last Name"+ i + "</a></td>";
-				table = table + "<td><a href=\"student.html?student=LastName" + i + "\">First Name"+ i + "</a></td>";
-				table = table + "<td><a href=\"class.html?class=Class" + i + "\">Class"+ i + "</a></td>";
-				table = table  + "</tr>";
-			}
-			table = table +  "</tbody></table></div>";
-			break;
+		renderStudentList();
+		break;
 		case 1:
-			var table = "<h2 class=\"sub-header\">List of the teachers</h2>";
-			table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>First Name</th><th>Last Name</th><th>Class</th></tr></thead>";
-			table = table + "<tbody>";
-			for (var i = 1; i <= 5; i++){
-				table = table +  "<tr>";
-				table = table + "<td>" + i + "</td>";
-				table = table + "<td><a href=\"teacher.html?teacher=LastName" + i + "\">Last Name"+ i + "</a></td>";
-				table = table + "<td><a href=\"teacher.html?teacher=LastName" + i + "\">First Name"+ i + "</a></td>";
-				table = table + "<td><a href=\"class.html?class=Class" + i + "\">Class"+ i + "</a></td>";
-				table = table  + "</tr>";
-			}
-			table = table +  "</tbody></table></div>";
-			break;
+		renderTeachersList();
+		break;
+		case 2:
+		renderClassesList();
 		default:
-			var table = "<h2 class=\"sub-header\">List of the classes</h2>";
-			table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Name</th><th>Teacher</th><th>Number of students</th></tr></thead>";
-			table = table + "<tbody>";
-			for (var i = 1; i <= 5; i++){
-				table = table +  "<tr>";
-				table = table + "<td>" + i + "</td>";
-				table = table + "<td><a href=\"class.html?class=Class" + i + "\">Class"+ i + "</a></td>";
-				table = table + "<td><a href=\"teacher.html?teacher=LastName" + i + "\">Teacher"+ i + "</a></td>";
-				table = table + "<td>"+ 30 + "</td>";
-				table = table  + "</tr>";
+		$('#table').html("");
+	}
+}
+
+function renderStudentList(){
+	$.ajax({
+		type : 'GET',
+		url : serverAddress + "/api/users/students?token=" + token(),
+
+		success : function(data, status){
+			if(data.success){
+				var table = "<h2 class=\"sub-header\">List of the students</h2>";
+				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Last Name</th><th>First Name</th><th>Class</th></tr></thead>";
+				table = table + "<tbody>";
+				for (var i = 0; i < data.users.length; i++){
+					table = table +  "<tr>";
+					table = table + "<td>" + i + "</td>";
+					table = table + "<td><a href=\"student.html?student=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
+					table = table + "<td><a href=\"student.html?student=" + data.users[i].email + "\">" + data.users[i].firstname + "</a></td>";
+					table = table + "<td><a href=\"class.html?class=" + data.users[i].id + "\">"+ data.users[i].name + "</a></td>";
+					table = table  + "</tr>";
+				}
+				table = table +  "</tbody></table></div>";
+				$('#table').html(table);
 			}
-			table = table +  "</tbody></table></div>";
-	} 
-	$('#table').html(table);
-}        
-           
+			else{
+				console.log(data.message)
+			}
+		},
+
+		error : function(data, status, error){
+			console.log("Failed to retrieve students\' list.");
+			console.log(data);
+			console.log(status);
+			console.log(error);
+		}
+	});
+}
+
+function renderTeachersList(){
+	$.ajax({
+		type : 'GET',
+		url : serverAddress + "/api/users/teachers?token=" + token(),
+
+		success : function(data, status){
+			if(data.success){
+				var table = "<h2 class=\"sub-header\">List of the teachers</h2>";
+				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>First Name</th><th>Last Name</th><th>Class</th></tr></thead>";
+				table = table + "<tbody>";
+				for (var i = 0; i < data.users.length; i++){
+					table = table +  "<tr>";
+					table = table + "<td>" + i + "</td>";
+					table = table + "<td><a href=\"teacher.html?teacher=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
+					table = table + "<td><a href=\"teacher.html?teacher=" + data.users[i].email + "\">" + data.users[i].firstname + "</a></td>";
+					table = table + "<td><a href=\"class.html?class=" + data.users[i].id + "\">"+ data.users[i].name + "</a></td>";
+					table = table  + "</tr>";
+				}
+				table = table +  "</tbody></table></div>";
+				$('#table').html(table);
+			}
+			else{
+				console.log(data.message)
+			}
+		},
+
+		error : function(data, status, error){
+			console.log("Failed to retrieve teachers\' list.");
+			console.log(data);
+			console.log(status);
+			console.log(error);
+		}
+	});
+}
+
+function renderClassesList(){
+	$.ajax({
+		type : 'GET',
+		url : serverAddress + "/api/classes?token=" + token(),
+
+		success : function(data, status){
+			if(data.success){
+				var table = "<h2 class=\"sub-header\">List of the classes</h2>";
+				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Name</th><th>Teacher\'s Last Name</th><th>Teacher\'s First Name</th><th>Number of students</th></tr></thead>";
+				table = table + "<tbody>";
+				for (var i = 0; i < data.classes.length; i++){
+					table = table +  "<tr>";
+					table = table + "<td>" + i + "</td>";
+					table = table + "<td><a href=\"class.html?class=" + data.classes[i].id + "\">"+ data.classes[i].name + "</a></td>";
+					table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].teacher + "\">"+ data.classes[i].lastname + "</a></td>";
+					table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].teacher + "\">"+ data.classes[i].firstname + "</a></td>";
+					table = table + "<td>"+ data.classes[i].students + "</td>";
+					table = table  + "</tr>";
+				}
+				table = table +  "</tbody></table></div>";
+				$('#table').html(table);
+			}
+			else{
+				console.log(data.message)
+			}
+		},
+
+		error : function(data, status, error){
+			console.log("Failed to retrieve classes\' list.");
+			console.log(data);
+			console.log(status);
+			console.log(error);
+		}
+	});
+}
