@@ -4,8 +4,9 @@ $(document).ready(function(){
 
 function renderElement(){
 	console.log("Function showEvent()");
-	if (getToken()){
-		document.getElementById("sign").style.display = "none";
+	if (!getToken()){
+			var sign = "<p><a id=\"sign\" class=\"btn btn-primary btn-lg\" role=\"button\" onclick=\"goToSignUp()\">Sign up &raquo;</a></p>";
+			$('#buttonS').html(sign);
 	}
 }
 
