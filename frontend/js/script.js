@@ -71,7 +71,7 @@ function logIn(){
 				if(data.success){
 					console.log(data.message);
 					setToken(data.token);
-					location.href="index.html";
+					window.location.reload();
 				}
 				else{
 					alert(data.message);
