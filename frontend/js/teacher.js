@@ -30,6 +30,9 @@ function renderElement(){
 							}
 							table = table +  "</tbody></table></div>";
 							$('#table').html(table);
+							if(getToken().level==2){
+								$('#downgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"downgradeToStudent()\">Downgrade to Student</button>");						
+							}
 						}
 						else{
 							table = table + "<h3>No students have been found.</h3>";
@@ -60,4 +63,18 @@ function renderElement(){
 			console.log(error);
 		}
 	});
+}
+
+function downgradeToStudent(){
+	console.log("Downgrading request clicked");
+	var email = decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
+	console.log(serverAddress + "/api/users/" + email + "?token="+token()+"&level=0");
+	$.ajax({
+		type : 'PUT',
+		url : serverAddress + "/api/users/" + email + "?token="+token()+"&level=0",
+		
+		success:function(data){
+			console.log("Level updated");
+		}
+	})
 }

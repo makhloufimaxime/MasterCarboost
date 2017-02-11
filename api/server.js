@@ -141,7 +141,6 @@ apiRoutes.get('/checkToken/:token', function(req, res) {
       message: 'No token provided.'
     });
   }
-
 });
 
 
@@ -184,11 +183,11 @@ apiRoutes.get('/users/students', function(req, res) {
     }
     else{
       if(data.length){
-              res.json({ success: true, users: data });
-          }
-          else{
-            res.json({ success: false, message: 'No student found.' });
-          }
+        res.json({ success: true, users: data });
+      }
+      else{
+        res.json({ success: false, message: 'No student found.' });
+      }
     }
   });
 });
@@ -203,7 +202,7 @@ apiRoutes.get('/users/teachers', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, users: data });
+        res.json({ success: true, users: data });
       }
       else{
         res.json({ success: false, message: 'No teacher found.' });
@@ -225,7 +224,7 @@ apiRoutes.get('/users/students/:email', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, user: data });
+        res.json({ success: true, user: data });
       }
       else{
         res.json({ success: false, message: 'Student not found.' });
@@ -247,7 +246,7 @@ apiRoutes.get('/users/students/:email/skills', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, skills: data });
+        res.json({ success: true, skills: data });
       }
       else{
         res.json({ success: false, message: 'No skill found.' });
@@ -269,7 +268,7 @@ apiRoutes.get('/users/teachers/:email', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, user: data });
+        res.json({ success: true, user: data });
       }
       else{
         res.json({ success: false, message: 'Teacher not found.' });
@@ -291,10 +290,47 @@ apiRoutes.get('/users/teachers/:email/students', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, users: data });
+        res.json({ success: true, users: data });
       }
       else{
         res.json({ success: false, message: 'No student found.' });
+      }
+    }
+  });
+});
+
+apiRoutes.put('/users/:email', function(req, res) {
+  var email = req.params.email;
+  var level = req.query.level;
+
+  // We first check if the user exists
+  var queryParams = [email];
+  var query = "SELECT * FROM Users WHERE email = ?";
+  connection.query(query, queryParams, function(err, data, fields){
+    if(err){
+      res.json({ success: false, message: 'Error. User not found.' });
+    }
+    else{
+      if(data == ""){
+        // if skill is not found
+        res.json({ success: false, message: 'User not found.' });
+      }
+      else{
+        if (req.decoded.level > 1) { // Only the admin can modify the level of an user
+          queryParams = [level, email];
+          var query = "UPDATE Users SET level = ? WHERE email = ?";
+          connection.query(query, queryParams, function (err, data, fields) {
+            if (err){
+              res.json({ success: false, message: 'Failed to modify this user\'s level.' });
+            }
+            else{
+              res.json({ success: true, message: 'User successfully updated.' });
+            }
+          });
+        }
+        else{
+          res.json({ success: false, message: 'You are not allowed to modify this user.' });
+        }
       }
     }
   });
@@ -312,7 +348,7 @@ apiRoutes.get('/classes', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, classes: data });
+        res.json({ success: true, classes: data });
       }
       else{
         res.json({ success: false, message: 'No class found.' });
@@ -334,7 +370,7 @@ apiRoutes.get('/classes/:id', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, class: data });
+        res.json({ success: true, class: data });
       }
       else{
         res.json({ success: false, message: 'Class not found.' });
@@ -356,11 +392,27 @@ apiRoutes.get('/classes/:id/students', function(req, res) {
     }
     else{
       if(data.length){
-          res.json({ success: true, users: data });
+        res.json({ success: true, users: data });
       }
       else{
         res.json({ success: false, message: 'No student found.' });
       }
+    }
+  });
+});
+
+//////////////////////////////// SKILLS ////////////////////////////////
+
+// Returns the skills' list
+// skill_id, skill_name
+apiRoutes.get('/skills', function(req, res) {
+  var query = "SELECT * FROM Skills";
+  connection.query(query, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'No skill found.' });
+    }
+    else{
+      res.json({ success: true, skills: data });
     }
   });
 });

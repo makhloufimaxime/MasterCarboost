@@ -33,6 +33,10 @@ function renderElement(){
 								progress = progress + "</div>";
 							}
 							$('#progressBar').html(progress);
+							//TODO: check si le user est super admin
+							if(getToken().level==2){
+							$('#upgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"upgradeToTeacher()\">Upgrade to teacher</button>");
+							}
 						}
 						else{
 							progress = progress + "<h3>No skills have been found.</h3>";
@@ -83,4 +87,18 @@ function progressBar(val){
 
 function edit(id){
 	location.href="edit.html?id=" + id;
+}
+
+function upgradeToTeacher(){
+	console.log("Upgrading request clicked");
+	var email = decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
+	console.log(serverAddress + "/api/users/" + email + "?token="+token()+"&level=1");
+	$.ajax({
+		type : 'PUT',
+		url : serverAddress + "/api/users/" + email + "?token="+token()+"&level=1",
+		
+		success:function(data){
+			console.log("Level updated");
+		}
+	})
 }
