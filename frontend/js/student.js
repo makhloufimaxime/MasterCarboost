@@ -13,7 +13,9 @@ function renderElement(){
 			if(data.success){
 				$('#student').html(data.user[0].firstname + " " + data.user[0].lastname + " - <a href=\"class.html?class=" + data.user[0].id + "\">" + data.user[0].name + "</a>");
 				var progress = "";
-
+				if(getToken().level==2){
+				$('#upgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"upgradeToTeacher()\">Upgrade to teacher</button>");
+				}
 				$.ajax({
 					type : 'GET',
 					url : serverAddress + "/api/users/students/" + email + "/skills?token=" + token(),
@@ -40,10 +42,6 @@ function renderElement(){
 							loadUnmarkedSkills(skillsName,progress);
 							else
 							$('#progressBar').html(progress);
-							//TODO: check si le user est super admin
-							if(getToken().level==2){
-							$('#upgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"upgradeToTeacher()\">Upgrade to teacher</button>");
-							}
 						}
 						else{
 							if(getToken().level > 0)
@@ -114,6 +112,7 @@ function upgradeToTeacher(){
 
 		success:function(data){
 			console.log("Level updated");
+			location.href="teacher.html?teacher="+ decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
 		}
 	})
 }

@@ -11,10 +11,12 @@ function renderElement(){
 
 		success : function(data, status){
 			if(data.success){
-				var table = "<h1 class=\"sub-header\">Students of " + data.user[0].firstname + " " + data.user[0].lastname + " - <a href=\"class.html?class=" + data.user[0].id + "\">" + data.user[0].name + "</a></h1>";
+				var table = "<h1 class=\"page-header\">Students of " + data.user[0].firstname + " " + data.user[0].lastname + " - <a href=\"class.html?class=" + data.user[0].id + "\">" + data.user[0].name + "</a></h1>";
 				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>First Name</th><th>Last Name</th></tr></thead>";
 				table = table + "<tbody>";
-
+				if(getToken().level==2){
+					$('#downgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"downgradeToStudent()\">Downgrade to Student</button>");
+				}
 				$.ajax({
 					type : 'GET',
 					url : serverAddress + "/api/users/teachers/" + email + "/students?token=" + token(),
@@ -30,9 +32,6 @@ function renderElement(){
 							}
 							table = table +  "</tbody></table></div>";
 							$('#table').html(table);
-							if(getToken().level==2){
-								$('#downgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"downgradeToStudent()\">Downgrade to Student</button>");						
-							}
 						}
 						else{
 							table = table + "<h3>No students have been found.</h3>";
@@ -72,9 +71,10 @@ function downgradeToStudent(){
 	$.ajax({
 		type : 'PUT',
 		url : serverAddress + "/api/users/" + email + "?token="+token()+"&level=0",
-		
+
 		success:function(data){
 			console.log("Level updated");
+			location.href="student.html?student="+ decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
 		}
 	})
 }

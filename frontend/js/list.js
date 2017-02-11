@@ -91,8 +91,13 @@ function renderStudentList(){
 				$('#table').html(table);
 			}
 			else{
-				var table = "<p><font color=\"red\">Please Sign Up or Log In to access to the list of the students.</font></p>";
-				$('#table').html(table);
+				if(getToken()){
+					var table = "<p>There is no student</p>";
+					$('#table').html(table);
+				}else {
+					var table = "<p><font color=\"red\">Please Sign Up or Log In to access to the list of the students.</font></p>";
+					$('#table').html(table);
+				}
 				console.log(data.message);
 			}
 		},
@@ -128,8 +133,13 @@ function renderTeachersList(){
 				$('#table').html(table);
 			}
 			else{
-				var table = "<p><font color=\"red\">Please Sign Up or Log In to access to the list of the teachers.</font></p>";
-				$('#table').html(table);
+				if(getToken()){
+					var table = "<p>There is no teacher</p>";
+					$('#table').html(table);
+				}else {
+					var table = "<p><font color=\"red\">Please Sign Up or Log In to access to the list of the teachers.</font></p>";
+					$('#table').html(table);
+				}
 				console.log(data.message);
 			}
 		},
@@ -165,8 +175,13 @@ function renderClassesList(){
 				$('#table').html(table);
 			}
 			else{
-				var table = "<p><font color=\"red\">Please Sign Up or Log In to access to the list of the classes.</font></p>";
-				$('#table').html(table);
+				if(getToken()){
+					var table = "<p>There is no class</p>";
+					$('#table').html(table);
+				}else {
+					var table = "<p><font color=\"red\">Please Sign Up or Log In to access to the list of the classes.</font></p>";
+					$('#table').html(table);
+				}
 				console.log(data.message);
 			}
 		},
