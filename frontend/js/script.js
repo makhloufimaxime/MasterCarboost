@@ -17,7 +17,7 @@ function renderNavBar(){
 			navBar = navBar + "<div class=\"form-group\"><label><FONT COLOR=\"#DCDCDC\"><a href=\"teacher.html?teacher=" + getToken().email + "\">" + getToken().email + " - " + getToken().firstname + " " + getToken().lastname + "</a></font></label></div>";
 		}
 		else{
-
+			navBar = navBar + "<div class=\"form-group\"><label><FONT COLOR=\"#DCDCDC\"><a>You are logged as the " + getToken().lastname + "</a></font></label></div>";
 		}
 		navBar = navBar + "	<button type=\"button\" class=\"btn btn-success\" onclick=\"logOut()\">Log Out</button></form>";
 		$('#navbar').html(navBar);
