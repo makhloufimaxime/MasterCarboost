@@ -20,6 +20,7 @@ function renderElement(){
 
 					success : function(data, status){
 						if(data.success){
+							var skillsName = [];
 							for (var i = 0; i < data.skills.length; i++){
 								progress = progress + "<div class=\"col-xs-6 col-sm-3 placeholder\">";
 								progress = progress + "<span class=\"text-muted\">" + data.skills[i].mark + "/5</span>";
@@ -27,11 +28,17 @@ function renderElement(){
 								progress = progress + progressBar(data.skills[i].mark);
 								progress = progress + "</div>";
 								progress = progress + "<h4>" + data.skills[i].name + "</h4>";
+								skillsName.push(data.skills[i].name);
 								// Check si le mec est prof de la classe ou non
 								if(getToken().level > 0)
 								progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(" + data.skills[0].id + ")\">Edit</a></p>";
 								progress = progress + "</div>";
 							}
+							console.log(skillsName);
+							//on a les noms de tous les skills de l'élève
+							if(getToken().level > 0)
+							loadUnmarkedSkills(skillsName,progress);
+							else
 							$('#progressBar').html(progress);
 							//TODO: check si le user est super admin
 							if(getToken().level==2){
@@ -39,8 +46,16 @@ function renderElement(){
 							}
 						}
 						else{
-							progress = progress + "<h3>No skills have been found.</h3>";
-							$('#progressBar').html(progress);
+							if(getToken().level > 0)
+							{
+								progress = progress + "<h3>No skills have been found.</h3>";
+								var skillsName = [];
+								loadUnmarkedSkills(skillsName,progress);
+							}
+							else{
+								progress = progress + "<h3>No skills have been found.</h3>";
+								$('#progressBar').html(progress);
+							}
 							console.log(data.message);
 						}
 					},
@@ -96,9 +111,46 @@ function upgradeToTeacher(){
 	$.ajax({
 		type : 'PUT',
 		url : serverAddress + "/api/users/" + email + "?token="+token()+"&level=1",
-		
+
 		success:function(data){
 			console.log("Level updated");
+		}
+	})
+}
+
+// function used to check if an array contains an element
+function contains(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function loadUnmarkedSkills(skillsName,progress){
+	var adding ="";
+	$.ajax({
+		type : 'GET',
+		url : serverAddress + "/api/skills?token="+token(),
+
+		success:function(data){
+			for (var i = 0; i < data.skills.length; i++){
+				if (!contains(skillsName,data.skills[i].name)) //si le nom n'est pas dans les skills deja présent
+				{
+					adding = adding + "<div class=\"col-xs-6 col-sm-3 placeholder\">";
+					adding = adding + "<span class=\"text-muted\">-</span>";
+					adding = adding + "<div class=\"progress\">"
+					adding = adding + progressBar(0);
+					adding = adding + "</div>";
+					adding = adding + "<h4>" + data.skills[i].name + "</h4>";
+					if(getToken().level > 0)
+					adding = adding + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(" + data.skills[0].id + ")\">Edit</a></p>";
+					adding = adding + "</div>";
+				}
+			}
+			progress = progress+adding;
+			$('#progressBar').html(progress);
 		}
 	})
 }

@@ -58,11 +58,8 @@ DROP TABLE IF EXISTS `classes`;
 CREATE TABLE `classes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `teacher` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `teacher_UNIQUE` (`teacher`),
-  KEY `users_fk_idx` (`teacher`),
-  CONSTRAINT `classes_users_fk` FOREIGN KEY (`teacher`) REFERENCES `users` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
+  `teacher` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -72,7 +69,7 @@ CREATE TABLE `classes` (
 
 LOCK TABLES `classes` WRITE;
 /*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,'FISE3','christophe.gravier@gmail.com'),(2,'FISA3','jacques.fayolle@gmail.com');
+INSERT INTO `classes` VALUES (1,'FISE3',''),(2,'FISA3','jacques.fayolle@gmail.com');
 /*!40000 ALTER TABLE `classes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -127,7 +124,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('admin@gmail.com','admintest','Admin','Admin',NULL,2),('christophe.gravier@gmail.com','123456','Christophe','Gravier',NULL,1),('dali.mersel@gmail.com','123456','Dali','Mersel',2,0),('fabien.forestier@gmail.com','123456','Fabien','Forestier',2,0),('guillaume.terpend@gmail.com','123456','Guillaume','Terpend',1,0),('jacques.fayolle@gmail.com','123456','Jacques','Fayolle',NULL,1),('maxime.makhloufi@gmail.com','123456','Maxime','Makhloufi',1,0),('oussama.boualem@gmail.com','123456','Oussama','Boualem',2,0),('robin.vanet@gmail.com','123456','Robin','Vanet',1,0);
+INSERT INTO `users` VALUES ('admin@gmail.com','admintest','Admin','Admin',NULL,2),('christophe.gravier@gmail.com','123456','Christophe','Gravier',NULL,1),('dali.mersel@gmail.com','123456','Dali','Mersel',NULL,0),('fabien.forestier@gmail.com','123456','Fabien','Forestier',2,0),('guillaume.terpend@gmail.com','123456','Guillaume','Terpend',1,0),('jacques.fayolle@gmail.com','123456','Jacques','Fayolle',NULL,1),('maxime.makhloufi@gmail.com','123456','Maxime','Makhloufi',1,0),('oussama.boualem@gmail.com','123456','Oussama','Boualem',2,0),('robin.vanet@gmail.com','123456','Robin','Vanet',1,0);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -140,4 +137,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-11  2:47:31
+-- Dump completed on 2017-02-11 18:42:41

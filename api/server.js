@@ -176,7 +176,7 @@ apiRoutes.use(function(req, res, next) {
 // Returns the students' list
 // user_email, user_firstname, user_lastname, class_id, class_name
 apiRoutes.get('/users/students', function(req, res) {
-  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 0 AND Users.class = Classes.id";
+  var query = "SELECT email, firstname, lastname, id, name FROM Users LEFT JOIN Classes ON Users.class = Classes.id WHERE level = 0";
   connection.query(query, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'No student found.' });
@@ -195,7 +195,7 @@ apiRoutes.get('/users/students', function(req, res) {
 // Returns the teachers' list
 // user_email, user_firstname, user_lastname, class_id, class_name
 apiRoutes.get('/users/teachers', function(req, res) {
-  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 1 AND Users.email = Classes.teacher";
+  var query = "SELECT email, firstname, lastname, id, name FROM Users LEFT JOIN Classes ON Users.email = Classes.teacher WHERE level = 1";
   connection.query(query, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'No teacher found.' });
@@ -216,7 +216,7 @@ apiRoutes.get('/users/teachers', function(req, res) {
 apiRoutes.get('/users/students/:email', function(req, res) {
   var email = req.params.email;
 
-  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 0 AND Users.class = Classes.id AND Users.email = ?";
+  var query = "SELECT email, firstname, lastname, id, name FROM Users LEFT JOIN Classes ON Users.class = Classes.id WHERE level = 0 AND Users.email = ?";
   var queryParams = [email];
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
@@ -260,7 +260,7 @@ apiRoutes.get('/users/students/:email/skills', function(req, res) {
 apiRoutes.get('/users/teachers/:email', function(req, res) {
   var email = req.params.email;
 
-  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 1 AND Users.email = Classes.teacher AND Users.email = ?";
+  var query = "SELECT email, firstname, lastname, id, name FROM Users LEFT JOIN Classes ON Users.email = Classes.teacher WHERE level = 1 AND email = ?";
   var queryParams = [email];
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
@@ -282,7 +282,7 @@ apiRoutes.get('/users/teachers/:email', function(req, res) {
 apiRoutes.get('/users/teachers/:email/students', function(req, res) {
   var email = req.params.email;
 
-  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE class = id AND teacher = ?";
+  var query = "SELECT email, firstname, lastname, id, name FROM Users LEFT JOIN Classes ON class = id WHERE teacher = ?";
   var queryParams = [email];
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
@@ -318,7 +318,7 @@ apiRoutes.put('/users/:email', function(req, res) {
       else{
         if (req.decoded.level > 1) { // Only the admin can modify the level of an user
           queryParams = [level, email];
-          var query = "UPDATE Users SET level = ? WHERE email = ?";
+          var query = "UPDATE Users SET level = ?, class = null WHERE email = ?";
           connection.query(query, queryParams, function (err, data, fields) {
             if (err){
               res.json({ success: false, message: 'Failed to modify this user\'s level.' });
@@ -341,7 +341,7 @@ apiRoutes.put('/users/:email', function(req, res) {
 // Returns the classes' list
 // class_id, class_name, teacher_email, teacher_firstname, teacher_lastname, count(students)
 apiRoutes.get('/classes', function(req, res) {
-  var query = "SELECT a.id, a.name, a.teacher, b.firstname, b.lastname, count(c.email) as students FROM Classes a, Users b, Users c WHERE a.teacher = b.email AND c.class = a.id GROUP BY a.id";
+  var query = "SELECT a.id, a.name, a.teacher, b.firstname, b.lastname, count(c.email) as students FROM Classes a LEFT JOIN Users b ON a.teacher = b.email LEFT JOIN Users c ON a.id = c.class GROUP BY a.id";
   connection.query(query, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'No class found.' });
