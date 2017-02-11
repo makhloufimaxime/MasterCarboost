@@ -108,7 +108,7 @@ apiRoutes.post('/login', function(req, res) {
           // create a token
           var payload = {"email":data[0].email,"firstname":data[0].firstname,"lastname":data[0].lastname,"level":data[0].level};
           var token = jwt.sign(payload, app.get('superSecret'), {
-            expiresIn: "2 days" // expires in 48 hours
+            expiresIn: "365 days" // expires in a year
           });
           // return the information including token as JSON
           res.json({
@@ -121,6 +121,29 @@ apiRoutes.post('/login', function(req, res) {
     }
   })
 });
+
+apiRoutes.get('/checkToken/:token', function(req, res) {
+  var token = req.params.token
+  if (token) {
+    // verifies secret and checks exp
+    jwt.verify(token, app.get('superSecret'), function(err, decoded) {
+      if (err) {
+        return res.json({ success: false, message: 'Failed to authenticate token.' });
+      } else {
+        return res.json({ success: true, message: 'This token is valid.' });
+      }
+    });
+  } else {
+    // if there is no token
+    // return an error
+    return res.status(403).send({
+      success: false,
+      message: 'No token provided.'
+    });
+  }
+
+});
+
 
 // TODO: route middleware to verify a token
 apiRoutes.use(function(req, res, next) {
