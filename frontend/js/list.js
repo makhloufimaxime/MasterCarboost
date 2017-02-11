@@ -75,14 +75,15 @@ function renderStudentList(){
 
 		success : function(data, status){
 			if(data.success){
+				console.log(data);
 				var table = "<h2 class=\"sub-header\">List of the students</h2>";
-				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Last Name</th><th>First Name</th><th>Class</th></tr></thead>";
+				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>First Name</th><th>Last Name</th><th>Class</th></tr></thead>";
 				table = table + "<tbody>";
 				for (var i = 0; i < data.users.length; i++){
 					table = table +  "<tr>";
 					table = table + "<td>" + i + "</td>";
-					table = table + "<td><a href=\"student.html?student=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
 					table = table + "<td><a href=\"student.html?student=" + data.users[i].email + "\">" + data.users[i].firstname + "</a></td>";
+					table = table + "<td><a href=\"student.html?student=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
 					table = table + "<td><a href=\"class.html?class=" + data.users[i].id + "\">"+ data.users[i].name + "</a></td>";
 					table = table  + "</tr>";
 				}
@@ -90,7 +91,7 @@ function renderStudentList(){
 				$('#table').html(table);
 			}
 			else{
-				console.log(data.message)
+				console.log(data.message);
 			}
 		},
 
@@ -116,8 +117,8 @@ function renderTeachersList(){
 				for (var i = 0; i < data.users.length; i++){
 					table = table +  "<tr>";
 					table = table + "<td>" + i + "</td>";
-					table = table + "<td><a href=\"teacher.html?teacher=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
 					table = table + "<td><a href=\"teacher.html?teacher=" + data.users[i].email + "\">" + data.users[i].firstname + "</a></td>";
+					table = table + "<td><a href=\"teacher.html?teacher=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
 					table = table + "<td><a href=\"class.html?class=" + data.users[i].id + "\">"+ data.users[i].name + "</a></td>";
 					table = table  + "</tr>";
 				}
@@ -125,7 +126,7 @@ function renderTeachersList(){
 				$('#table').html(table);
 			}
 			else{
-				console.log(data.message)
+				console.log(data.message);
 			}
 		},
 
@@ -146,14 +147,13 @@ function renderClassesList(){
 		success : function(data, status){
 			if(data.success){
 				var table = "<h2 class=\"sub-header\">List of the classes</h2>";
-				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Name</th><th>Teacher\'s Last Name</th><th>Teacher\'s First Name</th><th>Number of students</th></tr></thead>";
+				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Name</th><th>Teacher</th><th>Number of students</th></tr></thead>";
 				table = table + "<tbody>";
 				for (var i = 0; i < data.classes.length; i++){
 					table = table +  "<tr>";
 					table = table + "<td>" + i + "</td>";
 					table = table + "<td><a href=\"class.html?class=" + data.classes[i].id + "\">"+ data.classes[i].name + "</a></td>";
-					table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].teacher + "\">"+ data.classes[i].lastname + "</a></td>";
-					table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].teacher + "\">"+ data.classes[i].firstname + "</a></td>";
+					table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].teacher + "\">"+ data.classes[i].firstname + " " + data.classes[i].lastname + "</a></td>";
 					table = table + "<td>"+ data.classes[i].students + "</td>";
 					table = table  + "</tr>";
 				}
@@ -161,7 +161,7 @@ function renderClassesList(){
 				$('#table').html(table);
 			}
 			else{
-				console.log(data.message)
+				console.log(data.message);
 			}
 		},
 

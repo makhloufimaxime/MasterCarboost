@@ -26,7 +26,7 @@ function signUp(){
 					setToken(data.token);
 				}
 				else{
-					console.log(data.message)
+					console.log(data.message);
 				}
 			},
 

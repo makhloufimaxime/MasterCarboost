@@ -10,7 +10,15 @@ function renderNavBar(){
 	console.log("Function renderHeader()");
 	if(getToken()){
 		var navBar = "<form class=\"navbar-form navbar-right\">";
-		navBar = navBar + "<div class=\"form-group\"><label><FONT COLOR=\"#DCDCDC\">" + getToken().email + " - " + getToken().firstname + " " + getToken().lastname + "</font></label></div>";
+		if(getToken().level == 0){
+			navBar = navBar + "<div class=\"form-group\"><label><FONT COLOR=\"#DCDCDC\"><a href=\"student.html?student=" + getToken().email + "\">" + getToken().email + " - " + getToken().firstname + " " + getToken().lastname + "</a></font></label></div>";
+		}
+		else if (getToken().level == 1){
+			navBar = navBar + "<div class=\"form-group\"><label><FONT COLOR=\"#DCDCDC\"><a href=\"teacher.html?teacher=" + getToken().email + "\">" + getToken().email + " - " + getToken().firstname + " " + getToken().lastname + "</a></font></label></div>";
+		}
+		else{
+
+		}
 		navBar = navBar + "	<button type=\"button\" class=\"btn btn-success\" onclick=\"logOut()\">Log Out</button></form>";
 		$('#navbar').html(navBar);
 	}
@@ -24,7 +32,7 @@ function renderNavBar(){
 }
 
 function token(){
-	return window.localStorage.getItem("carboost-token")
+	return window.localStorage.getItem("carboost-token");
 }
 
 function getToken(){
@@ -48,8 +56,7 @@ function parseJwt (token) {
 	else{
 		return null;
 	}
-
-        };
+};
 
 function logIn(){
 	console.log("Function logIn()");
@@ -67,7 +74,7 @@ function logIn(){
 					location.href="index.html";
 				}
 				else{
-					console.log(data.message)
+					alert(data.message);
 				}
 			},
 

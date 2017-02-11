@@ -151,204 +151,136 @@ apiRoutes.use(function(req, res, next) {
 
 //////////////////////////////// USERS ////////////////////////////////
 
-// route to create a new user (POST http://localhost:8080/api/users/)
-apiRoutes.post('/users', function(req, res) {
-  var email = req.query.email;
-  var password = req.query.password;
-  var firstname = req.query.firstname;
-  var lastname = req.query.lastname;
-  var level = req.query.level;
-
-  var queryParams = [email, password, firstname, lastname, level];
-
-  var query = "INSERT INTO Users (email, password, firstname, lastname, level) VALUES (?, ?, ?, ?, ?)";
-  if(req.decoded.level > 1){ // Only the admin can create a new user
-    connection.query(query, queryParams, function(err){
-      if(err){
-        res.json({ success: false, message: 'Failed to create a new user.' });
-      }
-      else{
-        res.json({ success: true, message: 'New user successfully created.' });
-      }
-    });
-  }
-  else{
-    res.json({ success: false, message: 'You are not allowed to create a new user.' });
-  }
-});
-
-// route to return all users (GET http://localhost:8080/api/users)
-apiRoutes.get('/users', function(req, res) {
-  var query = "SELECT email, firstname, lastname FROM users";
-  connection.query(query, function (err, data, fields) {
-    if (err){
-      res.json({ success: false, message: 'No user found.' });
-    }
-    else{
-      res.json({ success: true, users: data });
-    }
-  });
-});
-
+// Returns the students' list
+// user_email, user_firstname, user_lastname, class_id, class_name
 apiRoutes.get('/users/students', function(req, res) {
   var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 0 AND Users.class = Classes.id";
   connection.query(query, function (err, data, fields) {
     if (err){
-      res.json({ success: false, message: 'No user found.' });
+      res.json({ success: false, message: 'No student found.' });
     }
     else{
-      res.json({ success: true, users: data });
+      if(data.length){
+              res.json({ success: true, users: data });
+          }
+          else{
+            res.json({ success: false, message: 'No student found.' });
+          }
     }
   });
 });
 
+// Returns the teachers' list
+// user_email, user_firstname, user_lastname, class_id, class_name
 apiRoutes.get('/users/teachers', function(req, res) {
   var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 1 AND Users.email = Classes.teacher";
   connection.query(query, function (err, data, fields) {
     if (err){
-      res.json({ success: false, message: 'No user found.' });
+      res.json({ success: false, message: 'No teacher found.' });
     }
     else{
-      res.json({ success: true, users: data });
+      if(data.length){
+          res.json({ success: true, users: data });
+      }
+      else{
+        res.json({ success: false, message: 'No teacher found.' });
+      }
     }
   });
 });
 
-// route to return an user (GET http://localhost:8080/api/users/:email)
-apiRoutes.get('/users/:email', function(req, res) {
+// Returns a student
+// user_email, user_firstname, user_lastname, class_id, class_name
+apiRoutes.get('/users/students/:email', function(req, res) {
   var email = req.params.email;
 
-  var query = "SELECT email, firstname, lastname FROM users WHERE email = ?";
+  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 0 AND Users.class = Classes.id AND Users.email = ?";
   var queryParams = [email];
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
-      res.json({ success: false, message: 'User not found.' });
+      res.json({ success: false, message: 'Student not found.' });
     }
     else{
-      res.json({ success: true, user: data });
-    }
-  });
-});
-
-// route to update an user (PUT http://localhost:8080/api/users/:email)
-apiRoutes.put('/users/:email', function(req, res) {
-  var email = req.params.email;
-  var password = req.query.password;
-  var class_ = req.query.class;
-  var level = req.query.level;
-  if(level > 1) {
-    level = 1;
-  }
-  else if (level < 0) {
-    level = 0;
-  }
-
-  // We first check if the user exists
-  var queryParams = [email];
-
-  var query = "SELECT * FROM Users WHERE email = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. User not found.' });
-    }
-    else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'User not found.' });
+      if(data.length){
+          res.json({ success: true, user: data });
       }
       else{
-        if (email == req.decoded.email) { // user is modifying his own account - He can only modify his password
-          queryParams = [password, email];
-          var query = "UPDATE Users SET password = ? WHERE email = ?";
-        }
-        else if (req.decoded.level > 1) { // admin is modifying the level of another user
-          queryParams = [level, email];
-          var query = "UPDATE Users SET level = ? WHERE email = ?";
-        }
-        else if (req.decoded.level > 0 && data[0].level == 0){ // teacher is modifying the class of a student
-          queryParams = [class_, email];
-          var query = "UPDATE Users SET class = ? WHERE email = ?";
-        }
-        else{
-          res.json({ success: false, message: 'You are not allowed to modify this user.' });
-        }
-
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'Failed to modify this user\'s information.' });
-          }
-          else{
-            res.json({ success: true, message: 'User\'s information successfully updated.' });
-          }
-        });
+        res.json({ success: false, message: 'Student not found.' });
       }
     }
   });
 });
 
-// route to delete an user (DELETE http://localhost:8080/api/users/:email)
-apiRoutes.delete('/users/:email', function(req, res) {
+// Returns the skills of a student
+// attribution_id, skill_name, attribution_mark
+apiRoutes.get('/users/students/:email/skills', function(req, res) {
   var email = req.params.email;
 
-  // We first check if the user exists
+  var query = "SELECT Attributions.id, Skills.name, Attributions.mark FROM Skills, Attributions, Users WHERE Skills.id = Attributions.skill AND Users.email = Attributions.student AND email = ?";
   var queryParams = [email];
-
-  var query = "SELECT * FROM Users WHERE email = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. User not found.' });
+  connection.query(query, queryParams, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'No skill found.' });
     }
     else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'User not found.' });
+      if(data.length){
+          res.json({ success: true, skills: data });
       }
       else{
-        if (req.decoded.level > 1 && email != req.decoded.email) { // only the admin can delete an account (and he can't delete his own account)
-        var query = "DELETE FROM Users WHERE email = ?";
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'Failed to delete this user.' });
-          }
-          else{
-            res.json({ success: true, message: 'User successfully deleted.' });
-          }
-        });
-      }
-      else{
-        res.json({ success: false, message: 'You are not allowed to delete this user.' });
+        res.json({ success: false, message: 'No skill found.' });
       }
     }
-  }
+  });
 });
+
+// Returns a teacher
+// user_email, user_firstname, user_lastname, class_id, class_name
+apiRoutes.get('/users/teachers/:email', function(req, res) {
+  var email = req.params.email;
+
+  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE level = 1 AND Users.email = Classes.teacher AND Users.email = ?";
+  var queryParams = [email];
+  connection.query(query, queryParams, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'Teacher not found.' });
+    }
+    else{
+      if(data.length){
+          res.json({ success: true, user: data });
+      }
+      else{
+        res.json({ success: false, message: 'Teacher not found.' });
+      }
+    }
+  });
+});
+
+// Returns the students of a teacher
+// class_id, class_name, teacher_email, teacher_firstname, teacher_lastname, count(students)
+apiRoutes.get('/users/teachers/:email/students', function(req, res) {
+  var email = req.params.email;
+
+  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE class = id AND teacher = ?";
+  var queryParams = [email];
+  connection.query(query, queryParams, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'No student found.' });
+    }
+    else{
+      if(data.length){
+          res.json({ success: true, users: data });
+      }
+      else{
+        res.json({ success: false, message: 'No student found.' });
+      }
+    }
+  });
 });
 
 //////////////////////////////// CLASSES ////////////////////////////////
 
-// route to create a new class (POST http://localhost:8080/api/classes/)
-apiRoutes.post('/classes', function(req, res) {
-  var name = req.query.name;
-  var teacher = req.query.teacher;
-
-  var queryParams = [name, teacher];
-
-  var query = "INSERT INTO Classes (name, teacher) VALUES (?, ?)";
-  if(req.decoded.level > 1){ // Only the admin can create a new class
-    connection.query(query, queryParams, function(err){
-      if(err){
-        res.json({ success: false, message: 'Failed to create a new class.' });
-      }
-      else{
-        res.json({ success: true, message: 'New class successfully created.' });
-      }
-    });
-  }
-  else{
-    res.json({ success: false, message: 'You are not allowed to create a new class.' });
-  }
-});
-
-// route to return all classes (GET http://localhost:8080/api/classes)
+// Returns the classes' list
+// class_id, class_name, teacher_email, teacher_firstname, teacher_lastname, count(students)
 apiRoutes.get('/classes', function(req, res) {
   var query = "SELECT a.id, a.name, a.teacher, b.firstname, b.lastname, count(c.email) as students FROM Classes a, Users b, Users c WHERE a.teacher = b.email AND c.class = a.id GROUP BY a.id";
   connection.query(query, function (err, data, fields) {
@@ -356,12 +288,18 @@ apiRoutes.get('/classes', function(req, res) {
       res.json({ success: false, message: 'No class found.' });
     }
     else{
-      res.json({ success: true, classes: data });
+      if(data.length){
+          res.json({ success: true, classes: data });
+      }
+      else{
+        res.json({ success: false, message: 'No class found.' });
+      }
     }
   });
 });
 
-// route to return a class (GET http://localhost:8080/api/classes/:id)
+// Returns a class
+// class_id, class_name, teacher_email, teacher_firstname, teacher_lastname, count(students)
 apiRoutes.get('/classes/:id', function(req, res) {
   var id = req.params.id;
 
@@ -372,439 +310,33 @@ apiRoutes.get('/classes/:id', function(req, res) {
       res.json({ success: false, message: 'Class not found.' });
     }
     else{
-      res.json({ success: true, class: data });
-    }
-  });
-});
-
-// route to update a class (PUT http://localhost:8080/api/classes/:id)
-apiRoutes.put('/classes/:id', function(req, res) {
-  var id = req.params.id;
-  var teacher = req.query.teacher;
-
-  // We first check if the class exists
-  var queryParams = [id];
-
-  var query = "SELECT * FROM Classes WHERE id = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. Class not found.' });
-    }
-    else{
-      if(data == ""){
-        // if class is not found
+      if(data.length){
+          res.json({ success: true, class: data });
+      }
+      else{
         res.json({ success: false, message: 'Class not found.' });
       }
-      else{
-        if (req.decoded.level > 1) { // Only the admin can modify a class
-          queryParams = [teacher, id];
-          var query = "UPDATE Classes SET teacher = ? WHERE id = ?";
-        }
-        else{
-          res.json({ success: false, message: 'You are not allowed to modify this class.' });
-        }
-
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'Failed to modify this class\'s teacher.' });
-          }
-          else{
-            res.json({ success: true, message: 'Class successfully updated.' });
-          }
-        });
-      }
     }
   });
 });
 
-// route to delete a class (DELETE http://localhost:8080/api/classes/:id)
-apiRoutes.delete('/classes/:id', function(req, res) {
+// Returns the students of a class
+// class_id, class_name, teacher_email, teacher_firstname, teacher_lastname, count(students)
+apiRoutes.get('/classes/:id/students', function(req, res) {
   var id = req.params.id;
 
-  // We first check if the user exists
-  var queryParams = [id];
-
-  var query = "SELECT * FROM Classes WHERE id = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. Class not found.' });
-    }
-    else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'Class not found.' });
-      }
-      else{
-        if (req.decoded.level > 1) { // only the admin can delete a class
-          var query = "DELETE FROM Classes WHERE id = ?";
-          connection.query(query, queryParams, function (err, data, fields) {
-            if (err){
-              res.json({ success: false, message: 'Failed to delete this class.' });
-            }
-            else{
-              res.json({ success: false, message: 'Class successfully deleted.' });
-            }
-          });
-        }
-        else{
-          res.json({ success: false, message: 'You are not allowed to delete this class.' });
-        }
-      }
-    }
-  });
-});
-
-//////////////////////////////// SKILLS ////////////////////////////////
-
-// route to create a new skill (POST http://localhost:8080/api/classes/)
-apiRoutes.post('/skills', function(req, res) {
-  var name = req.query.name;
-
-  var queryParams = [name];
-
-  var query = "INSERT INTO Classes (name) VALUES (?, ?)";
-  if(req.decoded.level > 1){ // Only the admin can create a new skill
-    connection.query(query, queryParams, function(err){
-      if(err){
-        res.json({ success: false, message: 'Failed to create a new skill.' });
-      }
-      else{
-        res.json({ success: true, message: 'New skill successfully created.' });
-      }
-    });
-  }
-  else{
-    res.json({ success: false, message: 'You are not allowed to create a new skill.' });
-  }
-});
-
-// route to return all skills (GET http://localhost:8080/api/skills)
-apiRoutes.get('/skills', function(req, res) {
-  var query = "SELECT * FROM Skills";
-  connection.query(query, function (err, data, fields) {
-    if (err){
-      res.json({ success: false, message: 'No skill found.' });
-    }
-    else{
-      res.json({ success: true, skills: data });
-    }
-  });
-});
-
-// route to return a skill (GET http://localhost:8080/api/skills/:id)
-apiRoutes.get('/skills/:id', function(req, res) {
-  var id = req.params.id;
-
-  var query = "SELECT * FROM Skills WHERE id = ?";
+  var query = "SELECT email, firstname, lastname, id, name FROM Users, Classes WHERE class = id AND class = ?";
   var queryParams = [id];
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
-      res.json({ success: false, message: 'Skill not found.' });
+      res.json({ success: false, message: 'No student found.' });
     }
     else{
-      res.json({ success: true, skill: data });
-    }
-  });
-});
-
-// route to update a skill (PUT http://localhost:8080/api/skills/:id)
-apiRoutes.put('/skills/:id', function(req, res) {
-  var id = req.params.id;
-  var name = req.query.name;
-
-  // We first check if the skill exists
-  var queryParams = [id];
-
-  var query = "SELECT * FROM Skills WHERE id = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. Skill not found.' });
-    }
-    else{
-      if(data == ""){
-        // if skill is not found
-        res.json({ success: false, message: 'Skill not found.' });
+      if(data.length){
+          res.json({ success: true, users: data });
       }
       else{
-        if (req.decoded.level > 0) { // Only the teachers or the admin can modify a skill
-          queryParams = [name, id];
-          var query = "UPDATE Skills SET name = ? WHERE id = ?";
-        }
-        else{
-          res.json({ success: false, message: 'You are not allowed to modify this skill.' });
-        }
-
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'Failed to modify this skill\'s name.' });
-          }
-          else{
-            res.json({ success: true, message: 'Skill successfully updated.' });
-          }
-        });
-      }
-    }
-  });
-});
-
-// route to delete a skill (DELETE http://localhost:8080/api/skills/:id)
-apiRoutes.delete('/skills/:id', function(req, res) {
-  var id = req.params.id;
-
-  // We first check if the user exists
-  var queryParams = [id];
-
-  var query = "SELECT * FROM Skills WHERE id = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. Skill not found.' });
-    }
-    else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'Skill not found.' });
-      }
-      else{
-        if (req.decoded.level > 0) { // only the teachers and the admin can delete a skill
-          var query = "DELETE FROM Classes WHERE id = ?";
-          connection.query(query, queryParams, function (err, data, fields) {
-            if (err){
-              res.json({ success: false, message: 'Failed to delete this skill.' });
-            }
-            else{
-              res.json({ success: false, message: 'Skill successfully deleted.' });
-            }
-          });
-        }
-        else{
-          res.json({ success: false, message: 'You are not allowed to delete this skill.' });
-        }
-      }
-    }
-  });
-});
-
-//////////////////////////////// ATTRIBUTIONS ////////////////////////////////
-
-// route to create a new attribution (POST http://localhost:8080/api/attributions/)
-apiRoutes.post('/attributions', function(req, res) {
-  var student = req.query.student;
-  var skill = req.query.skill;
-  var mark = req.query.mark;
-
-  var queryParams = [student, skill, mark];
-
-  var query = "INSERT INTO Attributions (student, skill, mark) VALUES (?, ?, ?)";
-  if(req.decoded.level > 0){ // Only the teachers and the admin can create a new attribution
-    connection.query(query, queryParams, function(err){
-      if(err){
-        res.json({ success: false, message: 'Failed to create a new attribution.' });
-      }
-      else{
-        res.json({ success: true, message: 'New attribution successfully created.' });
-      }
-    });
-  }
-  else{
-    res.json({ success: false, message: 'You are not allowed to create a new attribution.' });
-  }
-});
-
-// route to return all attributions (GET http://localhost:8080/api/attributions)
-apiRoutes.get('/attributions', function(req, res) {
-  var query = "SELECT * FROM Attributions";
-  connection.query(query, function (err, data, fields) {
-    if (err){
-      res.json({ success: false, message: 'No attribution found.' });
-    }
-    else{
-      res.json(data);
-    }
-  });
-});
-
-// route to return an attribution (GET http://localhost:8080/api/attributions/:id)
-apiRoutes.get('/attributions/:id', function(req, res) {
-  var id = req.params.id;
-
-  var query = "SELECT * FROM Attributions WHERE id = ?";
-  var queryParams = [id];
-  connection.query(query, queryParams, function (err, data, fields) {
-    if (err){
-      res.json({ success: false, message: 'Attribution not found.' });
-    }
-    else{
-      res.json(data);
-    }
-  });
-});
-
-// route to update an attribution (PUT http://localhost:8080/api/attributions/:id)
-apiRoutes.put('/attributions/:id', function(req, res) {
-  var id = req.params.id;
-  var mark = req.query.mark;
-
-  // We first check if the attribution exists
-  var queryParams = [id];
-
-  var query = "SELECT * FROM Attributions WHERE id = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. Attribution not found.' });
-    }
-    else{
-      if(data == ""){
-        // if skill is not found
-        res.json({ success: false, message: 'Attribution not found.' });
-      }
-      else{
-        if (req.decoded.level > 0) { // Only the teachers or the admin can modify an attribution
-          queryParams = [name, id];
-          var query = "UPDATE Attributions SET mark = ? WHERE id = ?";
-        }
-        else{
-          res.json({ success: false, message: 'You are not allowed to modify this attribution.' });
-        }
-
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'Failed to modify this attribution\'s mark.' });
-          }
-          else{
-            res.json({ success: true, message: 'Attribution successfully updated.' });
-          }
-        });
-      }
-    }
-  });
-});
-
-// route to delete an attribution (DELETE http://localhost:8080/api/attributions/:id)
-apiRoutes.delete('/attributions/:id', function(req, res) {
-  var id = req.params.id;
-
-  // We first check if the user exists
-  var queryParams = [id];
-
-  var query = "SELECT * FROM Attributions WHERE id = ?";
-  connection.query(query, queryParams, function(err, data, fields){
-    if(err){
-      res.json({ success: false, message: 'Error. Attribution not found.' });
-    }
-    else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'Attribution not found.' });
-      }
-      else{
-        if (req.decoded.level > 0) { // only the teachers and the admin can delete an attribution
-          var query = "DELETE FROM Attributions WHERE id = ?";
-          connection.query(query, queryParams, function (err, data, fields) {
-            if (err){
-              res.json({ success: false, message: 'Failed to delete this attribution.' });
-            }
-            else{
-              res.json({ success: false, message: 'Attribution successfully deleted.' });
-            }
-          });
-        }
-        else{
-          res.json({ success: false, message: 'You are not allowed to delete this attribution.' });
-        }
-      }
-    }
-  });
-});
-
-///////////////// OTHER ROUTES ///////////////////
-
-// route to return the class of an user (GET http://localhost:8080/api/users/:email/class)
-apiRoutes.get('/users/:email/class', function(req, res) {
-  var email = req.params.email;
-
-  var query = "SELECT * FROM Users WHERE email = ?";
-  var queryParams = [email];
-  connection.query(query, queryParams, function (err, data, fields) {
-    if (err){
-        res.json({ success: false, message: 'Error. User not found.' });
-    }
-    else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'User not found.' });
-      }
-      else{
-        queryParams = data[0].class;
-        query = "SELECT * FROM Classes WHERE id = ?";
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'Class not found.' });
-          }
-          else{
-            res.json(data);
-          }
-        });
-      }
-    }
-  });
-});
-
-// route to return the teacher of a class (GET http://localhost:8080/api/classes/:id/teacher)
-apiRoutes.get('/classes/:id/teacher', function(req, res) {
-  var id = req.params.id;
-
-  var query = "SELECT * FROM Classes WHERE id = ?";
-  var queryParams = [id];
-  connection.query(query, queryParams, function (err, data, fields) {
-    if (err){
-        res.json({ success: false, message: 'Error. Class not found.' });
-    }
-    else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'Class not found.' });
-      }
-      else{
-        queryParams = data[0].teacher;
-        query = "SELECT email, firstname, lastname FROM Users WHERE email = ?";
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'Teacher not found.' });
-          }
-          else{
-            res.json(data);
-          }
-        });
-      }
-    }
-  });
-});
-
-// route to return the attributions of an user (GET http://localhost:8080/api/users/:email/attributions)
-apiRoutes.get('/users/:email/attributions', function(req, res) {
-  var email = req.params.email;
-
-  var query = "SELECT * FROM Users WHERE email = ?";
-  var queryParams = [email];
-  connection.query(query, queryParams, function (err, data, fields) {
-    if (err){
-        res.json({ success: false, message: 'Error. User not found.' });
-    }
-    else{
-      if(data == ""){
-        // if user is not found
-        res.json({ success: false, message: 'User not found.' });
-      }
-      else{
-        query = "SELECT * FROM Attributions WHERE student = ?";
-        connection.query(query, queryParams, function (err, data, fields) {
-          if (err){
-            res.json({ success: false, message: 'No attribution found' });
-          }
-          else{
-            res.json(data);
-          }
-        });
+        res.json({ success: false, message: 'No student found.' });
       }
     }
   });
