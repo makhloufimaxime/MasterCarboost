@@ -8,6 +8,13 @@ function renderElement(){
 			var sign = "<p><a id=\"sign\" class=\"btn btn-primary btn-lg\" role=\"button\" onclick=\"goToSignUp()\">Sign up &raquo;</a></p>";
 			$('#buttonS').html(sign);
 	}
+	else
+	{
+		if(getToken().level ==2)
+		{
+			$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
+		}
+	}
 }
 
 function goToSignUp(){
@@ -29,4 +36,9 @@ function goToTeacher(){
 function goToClass(){
 	console.log("Function goToClass()")
 	location.href="list.html?list=Class";
+}
+
+function goToAdmin(){
+	console.log("Function goToAdmin()")
+	location.href="list.html?list=Admin";
 }

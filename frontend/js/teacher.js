@@ -16,6 +16,7 @@ function renderElement(){
 				table = table + "<tbody>";
 				if(getToken().level==2){
 					$('#downgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"downgradeToStudent()\">Downgrade to Student</button>");
+					$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
 				}
 				$.ajax({
 					type : 'GET',

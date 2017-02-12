@@ -15,6 +15,7 @@ function renderElement(){
 				var progress = "";
 				if(getToken().level==2){
 				$('#upgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"upgradeToTeacher()\">Upgrade to teacher</button>");
+				$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
 				}
 				$.ajax({
 					type : 'GET',
@@ -51,8 +52,10 @@ function renderElement(){
 								// 	}
 								// };
 								if(getToken().level > 0 /* && data.user[0].name == getToken() */)
-								progress = progress +  "<br/><input id=\"newNote" + i + "\"	 input type=\"range\" value=\"" + data2.skills[i].mark + "\" max=\"5\" min=\"0\" step=\"1\"";
-								progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(newNote" + i + ")\">Edit</a></p>";
+								// progress = progress +  "<br/><input id=\"newNote\" input type=\"range\" value=\"" + data2.skills[i].mark + "\" max=\"5\" min=\"0\" step=\"1\">";
+								progress + progress + "<input type=\"range\" id=\"myRange\" value=\"90\">";
+								console.log("test : " + 	document.getElementById("myRange").value);
+								progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit()\">Edit</a></p>";
 								progress = progress + "</div>";
 							}
 							console.log(skillsName);
@@ -117,11 +120,11 @@ function progressBar(val){
 	return html;
 }
 
-function edit(param){
-	console.log(document.getElementById(param).value);
-	// var n = document.getElementById(param).value;
-	// console.log(param + ":" + n);
-}
+// function edit(param){
+// 	console.log(document.getElementById(param));
+// 	// var n = document.getElementById(param).value;
+// 	// console.log(param + ":" + n);
+// }
 
 function upgradeToTeacher(){
 	console.log("Upgrading request clicked");

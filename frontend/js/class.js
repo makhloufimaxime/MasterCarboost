@@ -15,7 +15,11 @@ function renderElement(){
 				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>First Name</th><th>Last Name</th></tr></thead>";
 				table = table + "<tbody>";
 				table = table + "<tr><td>Teacher</td><td><a href=\"teacher.html?teacher=" + data.class[0].teacher + "\"><b>" + data.class[0].firstname +"</b></a></td><td><a href=\"teacher.html?teacher=" + data.class[0].teacher + "\"><b>" + data.class[0].lastname +"</b></a></td></tr>";
-
+				
+				if(getToken().level==2){
+					$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
+				}
+				
 				$.ajax({
 					type : 'GET',
 					url : serverAddress + "/api/classes/" + id +"/students?token=" + token(),

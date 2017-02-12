@@ -47,6 +47,12 @@ function renderSideBar(){
 		sideBar = sideBar + "<li><a href=\"list.html?list=Teacher\">Teacher</a></li>";
 		sideBar = sideBar + "<li><a href=\"list.html?list=Class\">Class</a></li>";
 	}
+	if (getToken()){
+		if(getToken().level ==2)
+		{
+			sideBar = sideBar + "<li><a href=\"admin.html\">Admin</a></li>";
+		}
+	}
 	sideBar = sideBar + "</ul>";
 	$('#sideBar').html(sideBar);
 }
@@ -65,6 +71,12 @@ function renderElement(){
 		renderClassesList();
 		default:
 		$('#table').html("");
+	}
+	if (getToken()){
+		if(getToken().level ==2)
+		{
+			$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
+		}
 	}
 }
 
