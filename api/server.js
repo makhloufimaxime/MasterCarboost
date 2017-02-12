@@ -233,6 +233,28 @@ apiRoutes.get('/users/students/:email', function(req, res) {
   });
 });
 
+// Returns the teacher of a student
+// user_email, user_firstname, user_lastname, class_id, class_name
+apiRoutes.get('/users/students/:email/teacher', function(req, res) {
+  var email = req.params.email;
+
+  var query = "SELECT b.teacher, c.firstname, c.lastname, b.id, b.name FROM Users a LEFT JOIN Classes b ON a.class = b.id LEFT JOIN Users c on b.teacher = c.email WHERE a.email = ?";
+  var queryParams = [email];
+  connection.query(query, queryParams, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'User not found.' });
+    }
+    else{
+      if(data.length){
+        res.json({ success: true, user: data });
+      }
+      else{
+        res.json({ success: false, message: 'User not found.' });
+      }
+    }
+  });
+});
+
 // Returns the teachers that don't have a class dezadazdafezezf
 // user_email, user_firstname, user_lastname
 apiRoutes.get('/users/teachers/free', function(req, res) {
