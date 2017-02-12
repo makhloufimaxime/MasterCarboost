@@ -233,6 +233,25 @@ apiRoutes.get('/users/students/:email', function(req, res) {
   });
 });
 
+// Returns the teachers that don't have a class dezadazdafezezf
+// user_email, user_firstname, user_lastname
+apiRoutes.get('/users/teachers/free', function(req, res) {
+  var query = "SELECT email, firstname, lastname FROM Users LEFT JOIN Classes ON Classes.teacher = Users.email WHERE teacher IS null AND level = 1";
+  connection.query(query, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'No teacher found.' });
+    }
+    else{
+      if(data.length){
+        res.json({ success: true, users: data });
+      }
+      else{
+        res.json({ success: false, message: 'No teacher found.' });
+      }
+    }
+  });
+});
+
 // Returns the skills of a student
 // attribution_id, skill_name, attribution_mark
 apiRoutes.get('/users/students/:email/skills', function(req, res) {
@@ -338,6 +357,28 @@ apiRoutes.put('/users/:email', function(req, res) {
 
 //////////////////////////////// CLASSES ////////////////////////////////
 
+// route to create a new class (POST http://localhost:8080/api/classes/)
+apiRoutes.post('/classes', function(req, res) {
+  var name = req.query.name;
+
+  var queryParams = [name];
+
+  var query = "INSERT INTO Classes (name) VALUES (?)";
+  if(req.decoded.level > 1){ // Only the admin can create a new class
+    connection.query(query, queryParams, function(err){
+      if(err){
+        res.json({ success: false, message: 'Failed to create a new class.' });
+      }
+      else{
+        res.json({ success: true, message: 'New class successfully created.' });
+      }
+    });
+  }
+  else{
+    res.json({ success: false, message: 'You are not allowed to create a new class.' });
+  }
+});
+
 // Returns the classes' list
 // class_id, class_name, teacher_email, teacher_firstname, teacher_lastname, count(students)
 apiRoutes.get('/classes', function(req, res) {
@@ -401,6 +442,83 @@ apiRoutes.get('/classes/:id/students', function(req, res) {
   });
 });
 
+// route to update a class (PUT http://localhost:8080/api/classes/:id)
+apiRoutes.put('/classes/:id', function(req, res) {
+  var id = req.params.id;
+  var teacher = req.query.teacher;
+
+  // We first check if the class exists
+  var queryParams = [id];
+
+  var query = "SELECT * FROM Classes WHERE id = ?";
+  connection.query(query, queryParams, function(err, data, fields){
+    if(err){
+      res.json({ success: false, message: 'Error. Class not found.' });
+    }
+    else{
+      if(data == ""){
+        // if class is not found
+        res.json({ success: false, message: 'Class not found.' });
+      }
+      else{
+        if (req.decoded.level > 1) { // Only the admin can modify a class
+          queryParams = [teacher, id];
+          var query = "UPDATE Classes SET teacher = ? WHERE id = ?";
+        }
+        else{
+          res.json({ success: false, message: 'You are not allowed to modify this class.' });
+        }
+
+        connection.query(query, queryParams, function (err, data, fields) {
+          if (err){
+            res.json({ success: false, message: 'Failed to modify this class\' teacher.' });
+          }
+          else{
+            res.json({ success: true, message: 'Class successfully updated.' });
+          }
+        });
+      }
+    }
+  });
+});
+
+// route to delete a class (DELETE http://localhost:8080/api/classes/:id)
+apiRoutes.delete('/classes/:id', function(req, res) {
+  var id = req.params.id;
+
+  // We first check if the user exists
+  var queryParams = [id];
+
+  var query = "SELECT * FROM Classes WHERE id = ?";
+  connection.query(query, queryParams, function(err, data, fields){
+    if(err){
+      res.json({ success: false, message: 'Error. Class not found.' });
+    }
+    else{
+      if(data == ""){
+        // if user is not found
+        res.json({ success: false, message: 'Class not found.' });
+      }
+      else{
+        if (req.decoded.level > 1) { // only the admin can delete a class
+          var query = "DELETE FROM Classes WHERE id = ?";
+          connection.query(query, queryParams, function (err, data, fields) {
+            if (err){
+              res.json({ success: false, message: 'Failed to delete this class.' });
+            }
+            else{
+              res.json({ success: false, message: 'Class successfully deleted.' });
+            }
+          });
+        }
+        else{
+          res.json({ success: false, message: 'You are not allowed to delete this class.' });
+        }
+      }
+    }
+  });
+});
+
 //////////////////////////////// SKILLS ////////////////////////////////
 
 // Returns the skills' list
@@ -415,6 +533,28 @@ apiRoutes.get('/skills', function(req, res) {
       res.json({ success: true, skills: data });
     }
   });
+});
+
+// Create a new skill
+apiRoutes.post('/skills', function(req, res) {
+  var name = req.query.name;
+
+  var queryParams = [name];
+
+  var query = "INSERT INTO Skills (name) VALUES (?)";
+  if(req.decoded.level > 1){ // Only the admin can create a new skill
+    connection.query(query, queryParams, function(err){
+      if(err){
+        res.json({ success: false, message: 'Failed to create a new skill.' });
+      }
+      else{
+        res.json({ success: true, message: 'New skill successfully created.' });
+      }
+    });
+  }
+  else{
+    res.json({ success: false, message: 'You are not allowed to create a new skill.' });
+  }
 });
 
 // apply the routes to our application with the prefix /api
