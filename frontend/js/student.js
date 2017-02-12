@@ -33,36 +33,29 @@ function renderElement(){
 								progress = progress + "<h4>" + data2.skills[i].name + "</h4>";
 								skillsName.push(data2.skills[i].name);
 								// Check si le mec est prof de la classe ou non
-								// $.ajax({
-								// 	type : 'GET',
-								// 	url : serverAddress + "/api/users/students/" + email + "/teacher?token=" + token(),
-								//
-								// 	success : function(data3, status){
-								// 		//
-								// 		if(getToken().level > 0  && data3.user[0].teacher == getToken().email ){
-								// 			progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(" + data2.skills[0].id + ")\">Edit</a></p>";
-								// 			progress = progress + "</div>";
-								// 		}
-								// 	},
-								// 	error : function(data3, status, error){
-								// 		console.log("Failed to retrieve teachers\' list.");
-								// 		console.log(data3);
-								// 		console.log(status);
-								// 		console.log(error);
-								// 	}
-								// };
-								if(getToken().level > 0 /* && data.user[0].name == getToken() */)
-								// progress = progress +  "<br/><input id=\"newNote\" input type=\"range\" value=\"" + data2.skills[i].mark + "\" max=\"5\" min=\"0\" step=\"1\">";
-								progress + progress + "<input type=\"range\" id=\"myRange\" value=\"90\">";
-								console.log("test : " + 	document.getElementById("myRange").value);
-								progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit()\">Edit</a></p>";
+								$.ajax({
+									type : 'GET',
+									url : serverAddress + "/api/users/students/" + email + "/teacher?token=" + token(),
+
+									success : function(data3, status){
+										//
+										if(getToken().level > 0  && data3.user[0].teacher == getToken().email ){
+											progress = progress +  "<br/><input id=\"newNote"+i+"\" input type=\"range\" value=\"" + data2.skills[i].mark + "\" max=\"5\" min=\"0\" step=\"1\">";
+											progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(newNote"+i+")\">Edit</a></p>";
+											//on a les noms de tous les skills de l'élève
+											loadUnmarkedSkills(skillsName,progress);
+										}
+									},
+									error : function(data3, status, error){
+										console.log("You are not the teacher of this class.");
+										console.log(data3);
+										console.log(status);
+										console.log(error);
+									}
+								});
 								progress = progress + "</div>";
 							}
 							console.log(skillsName);
-							//on a les noms de tous les skills de l'élève
-							if(getToken().level > 0)
-							loadUnmarkedSkills(skillsName,progress);
-							else
 							$('#progressBar').html(progress);
 						}
 						else{
@@ -120,11 +113,10 @@ function progressBar(val){
 	return html;
 }
 
-// function edit(param){
-// 	console.log(document.getElementById(param));
-// 	// var n = document.getElementById(param).value;
-// 	// console.log(param + ":" + n);
-// }
+function edit(c){
+	console.log(c);
+	console.log(document.getElementById(c).value);
+}
 
 function upgradeToTeacher(){
 	console.log("Upgrading request clicked");
