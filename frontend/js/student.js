@@ -20,20 +20,39 @@ function renderElement(){
 					type : 'GET',
 					url : serverAddress + "/api/users/students/" + email + "/skills?token=" + token(),
 
-					success : function(data, status){
-						if(data.success){
+					success : function(data2, status){
+						if(data2.success){
 							var skillsName = [];
-							for (var i = 0; i < data.skills.length; i++){
+							for (var i = 0; i < data2.skills.length; i++){
 								progress = progress + "<div class=\"col-xs-6 col-sm-3 placeholder\">";
-								progress = progress + "<span class=\"text-muted\">" + data.skills[i].mark + "/5</span>";
+								progress = progress + "<span class=\"text-muted\">" + data2.skills[i].mark + "/5</span>";
 								progress = progress + "<div class=\"progress\">"
-								progress = progress + progressBar(data.skills[i].mark);
+								progress = progress + progressBar(data2.skills[i].mark);
 								progress = progress + "</div>";
-								progress = progress + "<h4>" + data.skills[i].name + "</h4>";
-								skillsName.push(data.skills[i].name);
+								progress = progress + "<h4>" + data2.skills[i].name + "</h4>";
+								skillsName.push(data2.skills[i].name);
 								// Check si le mec est prof de la classe ou non
-								if(getToken().level > 0)
-								progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(" + data.skills[0].id + ")\">Edit</a></p>";
+								// $.ajax({
+								// 	type : 'GET',
+								// 	url : serverAddress + "/api/users/students/" + email + "/teacher?token=" + token(),
+								//
+								// 	success : function(data3, status){
+								// 		//
+								// 		if(getToken().level > 0  && data3.user[0].teacher == getToken().email ){
+								// 			progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(" + data2.skills[0].id + ")\">Edit</a></p>";
+								// 			progress = progress + "</div>";
+								// 		}
+								// 	},
+								// 	error : function(data3, status, error){
+								// 		console.log("Failed to retrieve teachers\' list.");
+								// 		console.log(data3);
+								// 		console.log(status);
+								// 		console.log(error);
+								// 	}
+								// };
+								if(getToken().level > 0 /* && data.user[0].name == getToken() */)
+								progress = progress +  "<br/><input id=\"newNote" + i + "\"	 input type=\"range\" value=\"" + data2.skills[i].mark + "\" max=\"5\" min=\"0\" step=\"1\"";
+								progress = progress + "<p><br/><a id=\"sign\" class=\"btn btn-primary\" role=\"button\" onclick=\"edit(newNote" + i + ")\">Edit</a></p>";
 								progress = progress + "</div>";
 							}
 							console.log(skillsName);
@@ -54,20 +73,20 @@ function renderElement(){
 								progress = progress + "<h3>No skills have been found.</h3>";
 								$('#progressBar').html(progress);
 							}
-							console.log(data.message);
+							console.log(data2.message);
 						}
 					},
 
-					error : function(data, status, error){
+					error : function(data2, status, error){
 						console.log("Failed to retrieve teachers\' list.");
-						console.log(data);
+						console.log(data2);
 						console.log(status);
 						console.log(error);
 					}
 				});
 			}
 			else{
-				console.log(data.message);
+				console.log(data2.message);
 				location.href="index.html";
 			}
 		},
@@ -98,8 +117,10 @@ function progressBar(val){
 	return html;
 }
 
-function edit(id){
-	location.href="edit.html?id=" + id;
+function edit(param){
+	console.log(document.getElementById(param).value);
+	// var n = document.getElementById(param).value;
+	// console.log(param + ":" + n);
 }
 
 function upgradeToTeacher(){

@@ -93,3 +93,10 @@ function logOut(){
 	deleteToken();
 	location.href="index.html";
 }
+
+function isNull(param){
+	if(param == null){
+		return true;
+	}
+	return false;
+}
