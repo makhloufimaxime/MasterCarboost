@@ -260,7 +260,7 @@ apiRoutes.get('/users/students/:email/class', function(req, res) {
   var email = req.params.email;
   var queryParams = [email];
 
-  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(otherStudents.email) as students FROM Users student LEFT JOIN Classes class ON student.class = class.name LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users otherStudents ON teacher.class = otherStudents.class WHERE student.email = ?;";
+  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(otherStudents.email) as students FROM Users student LEFT JOIN Classes class ON student.class = class.name LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users otherStudents ON teacher.class = otherStudents.class WHERE student.level = 0 AND otherStudents.level = 0 AND student.email = ?;";
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'Error : Student not found.', error: err });
@@ -360,7 +360,7 @@ apiRoutes.get('/users/teachers/:email/class', function(req, res) {
   var email = req.params.email;
   var queryParams = [email];
 
-  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Users teacher LEFT JOIN Classes class ON teacher.class = class.name LEFT JOIN Users nbStudents ON class.name = nbStudents.class WHERE teacher.email = ?;";
+  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Users teacher LEFT JOIN Classes class ON teacher.class = class.name LEFT JOIN Users nbStudents ON class.name = nbStudents.class WHERE teacher.level = 1 AND nbStudents.level = 0 AND teacher.email = ?;";
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'Error : Teacher not found.', error: err });
@@ -420,7 +420,7 @@ apiRoutes.get('/classes/:name', function(req, res) {
   var name = req.params.name;
   var queryParams = [name];
 
-  var query = "SELECT * FROM Classes;SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Classes class LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users nbStudents ON class.name = nbStudents.class WHERE class.name = ?;";
+  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Classes class LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users nbStudents ON class.name = nbStudents.class WHERE teacher.level = 1 AND nbStudents.level = 0 AND class.name = ?;";
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'Error. Class not found.', error: err });
