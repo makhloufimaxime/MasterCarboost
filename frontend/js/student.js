@@ -1,4 +1,7 @@
 $(document).ready(function(){
+	if(getToken().level==2){
+	$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
+	}
 	renderElement();
 });
 
@@ -11,11 +14,38 @@ function renderElement(){
 
 		success : function(data, status){
 			if(data.success){
-				$('#student').html(data.user[0].firstname + " " + data.user[0].lastname + " - <a href=\"class.html?class=" + data.user[0].id + "\">" + data.user[0].name + "</a>");
+				$('#student').html(data.user[0].firstname + " " + data.user[0].lastname + " - <a href=\"class.html?class=" + data.user[0].class + "\">" + data.user[0].class + "</a>");
 				var progress = "";
 				if(getToken().level==2){
 				$('#upgradeButton').html("<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"upgradeToTeacher()\">Upgrade to teacher</button>");
-				$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
+				var studentClass = "<h1>Classe : ";
+				$.ajax({
+					type : 'GET',
+					url : serverAddress + "/api/users/students/"+email+"/class?token="+token(),
+
+					success : function(dataClass,status)
+					{
+						if (dataClass.success)
+						{
+							console.log("Chargement de la classe effectué : ");
+							console.log(dataClass.class[0]);
+							if (dataClass.class[0].name != null)
+							{
+								console.log(dataClass.class[0].name);
+								studentClass = studentClass + dataClass.class[0].name + "</h1>";
+								studentClass = studentClass + "<button class=\"btn btn-lg btn-danger \" type=\"button\" onclick=\"supprimerClasse()\">Exclure de la classe</button>" + "</td>";
+							}
+							else
+							{
+								studentClass = studentClass + "Aucune Classe" + "</h1>";
+								studentClass = studentClass + "<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"ajouterClasse()\">Ajouter a une classe</button>" + "</td>";
+							}
+							$('#StudentClass').html(studentClass);
+						}
+					}
+				});
+
+
 				}
 				$.ajax({
 					type : 'GET',
@@ -30,8 +60,8 @@ function renderElement(){
 								progress = progress + "<div class=\"progress\">"
 								progress = progress + progressBar(data2.skills[i].mark);
 								progress = progress + "</div>";
-								progress = progress + "<h4>" + data2.skills[i].name + "</h4>";
-								skillsName.push(data2.skills[i].name);
+								progress = progress + "<h4>" + data2.skills[i].skill + "</h4>";
+								skillsName.push(data2.skills[i].skill);
 								// Check si le mec est prof de la classe ou non
 								$.ajax({
 									type : 'GET',
@@ -151,7 +181,7 @@ function loadUnmarkedSkills(skillsName,progress){
 
 		success:function(data){
 			for (var i = 0; i < data.skills.length; i++){
-				if (!contains(skillsName,data.skills[i].name)) //si le nom n'est pas dans les skills deja présent
+				if (!contains(skillsName,data.skills[i].skill)) //si le nom n'est pas dans les skills deja présent
 				{
 					adding = adding + "<div class=\"col-xs-6 col-sm-3 placeholder\">";
 					adding = adding + "<span class=\"text-muted\">-</span>";
@@ -168,4 +198,72 @@ function loadUnmarkedSkills(skillsName,progress){
 			$('#progressBar').html(progress);
 		}
 	})
+}
+
+function supprimerClasse(){
+	console.log("tentative de suppression de classe d'un eleve");
+	var email = decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
+	//todo : update l'élève pour changer sa classe
+	console.log(serverAddress + "/api/users/"+email+"?class=&token="+token());
+	$.ajax({
+		type : 'PUT',
+		url : serverAddress + "/api/users/"+email+"?class=null&token="+token(),
+
+		success:function(data,status){
+			console.log(data);
+			if(data.success)
+			{
+				console.log("Class deleted");
+				renderElement();
+			}
+			else{
+				console.log("Error while deleting class");
+			}
+		}
+	});
+}
+
+function ajouterClasse(){
+	console.log("tentative d'ajout de classe d'un eleve");
+	$('#StudentClass').html("");
+	$.ajax({
+		type : 'GET',
+		url : serverAddress + "/api/classes?token=" + token(),
+		success : function(data, status){
+			if(data.success){
+				console.log(data);
+				var listeClasses = "";
+				for (var i=0; i< data.classes.length;i++)
+				{
+					console.log(data.classes[i]);
+					var className = data.classes[i].name;/*data.users[i].firstname + " " + data.users[i].lastname;*/
+					console.log("classe #"+i+ " : ")
+					console.log(className);
+					listeClasses = listeClasses +"<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"choisirClasse('"+className+"')\">"+className+"</button>";
+				}
+				$('#ClassList').html(listeClasses);
+			}
+		}
+	});
+}
+
+function choisirClasse(className){
+		var email = decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
+		//todo : update l'élève pour changer sa classe
+		$.ajax({
+		type : 'PUT',
+		url : serverAddress + "/api/users/"+email+"?class="+className+"&token="+token(),
+
+		success:function(data,status){
+			if(data.success)
+			{
+				console.log("Class updated");
+				$('#ClassList').html("");
+				renderElement();
+			}
+			else{
+				console.log("Error while updating class");
+			}
+		}
+	});
 }

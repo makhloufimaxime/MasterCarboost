@@ -428,7 +428,7 @@ apiRoutes.get('/classes/:name', function(req, res) {
   var name = req.params.name;
   var queryParams = [name];
 
-  var query = "SELECT * FROM Classes;SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Classes class LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users nbStudents ON class.name = nbStudents.class WHERE class.name = ?;";
+  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Classes class LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users nbStudents ON class.name = nbStudents.class WHERE class.name = ?;";
   connection.query(query, queryParams, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'Error. Class not found.', error: err });

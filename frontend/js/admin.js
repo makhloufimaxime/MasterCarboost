@@ -13,7 +13,7 @@ function renderElement(){
 			if(data.success){
 				if(getToken().level ==2)
 				{
-					$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"list.html?list=Admin\">Admin</a></li>");
+					$( '#adminBoard' ).html("");
 					//$( '#adminBoard' ).append( "<h1>Test</h1>" ); //put the admin control panel here
 					$( '#adminBoard' ).append( "<h1>Creer une nouvelle classe : </h1>" );
 					$( '#adminBoard' ).append( "<div class=\"form-group\"><label for=\"usr\">Nom de la classe:</label><input type=\"text\" class=\"form-control\" id=\"nomClasse\"></div>" );
@@ -29,25 +29,26 @@ function renderElement(){
 						type : 'GET',
 						url : serverAddress + "/api/classes?token=" + token(),
 
-						success : function(data, status){
-							if(data.success){
-								var table = "<h2 class=\"sub-header\">List des classes</h2>";
+						success : function(dataClasses, status){
+							if(dataClasses.success){
+								console.log(dataClasses);
+								var table = "<h2 class=\"sub-header\">Liste des classes</h2>";
 								table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Name</th><th>Teacher</th><th>Options</th></tr></thead>";
 								table = table + "<tbody>";
-								for (var i = 0; i < data.classes.length; i++){
+								for (var i = 0; i < dataClasses.classes.length; i++){
 									table = table +  "<tr>";
 									table = table + "<td>" + i + "</td>";
-									table = table + "<td><a href=\"class.html?class=" + data.classes[i].id + "\">"+ data.classes[i].name + "</a></td>";
-									table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].teacher + "\">"+ data.classes[i].firstname + " " + data.classes[i].lastname + "</a></td>";
-									if (data.classes[i].firstname!= null)
+									table = table + "<td><a href=\"class.html?class=" + dataClasses.classes[i].id + "\">"+ dataClasses.classes[i].name + "</a></td>";
+									table = table + "<td><a href=\"teacher.html?teacher=" + dataClasses.classes[i].teacher + "\">"+ dataClasses.classes[i].firstname + " " + dataClasses.classes[i].lastname + "</a></td>";
+									if (dataClasses.classes[i].firstname!= null)
 									{
-										table = table + "<td>"+ "<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"supprimerProfesseur("+data.classes[i].id+")\">Enlever ce professeur</button>";
-										table = table + "<button class=\"btn btn-lg btn-danger \" type=\"button\" onclick=\"supprimerClasse("+data.classes[i].id+")\">Supprimer la classe</button>" + "</td>";
+										table = table + "<td>"+ "<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"supprimerProfesseur('"+dataClasses.classes[i].name+"')\">Enlever ce professeur</button>";
+										table = table + "<button class=\"btn btn-lg btn-danger \" type=\"button\" onclick=\"supprimerClasse('"+dataClasses.classes[i].name+"')\">Supprimer la classe</button>" + "</td>";
 									}
 									else
 									{
-										table = table + "<td>"+ "<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"ajouterProfesseur("+data.classes[i].id+")\">Ajouter un professeur </button>";
-										table = table + "<button class=\"btn btn-lg btn-danger \" type=\"button\" onclick=\"supprimerClasse("+data.classes[i].id+")\">Supprimer la classe</button>" + "</td>";
+										table = table + "<td>"+ "<button class=\"btn btn-lg btn-primary \" type=\"button\" onclick=\"ajouterProfesseur('"+dataClasses.classes[i].name+"')\">Ajouter un professeur </button>";
+										table = table + "<button class=\"btn btn-lg btn-danger \" type=\"button\" onclick=\"supprimerClasse('"+dataClasses.classes[i].name+"')\">Supprimer la classe</button>" + "</td>";
 									}
 									table = table  + "</tr>";
 								}
@@ -98,40 +99,102 @@ function renderElement(){
 
 function creerNouvelleClasse(){
 	nomClasseText = $('#nomClasse').val(); //marche
-	if (!nomClasseText==null)
+	if (!nomClasseText=="")
 	{
-		console.log("class creation request received!");
 		console.log("class name = "+nomClasseText);	
+		$.ajax({
+			type : 'POST',
+			url : serverAddress + "/api/classes?name="+nomClasseText+"&token="+token(),
+			
+			success : function(data,status){
+				if (data.success){
+					console.log("Class created successfuly");
+					renderElement();
+				}
+				else
+				{
+					console.log("Class creation failed");
+				}
+			}
+		});
 	}
 }
 
 function creerNouvelleCompetence(){
 	nomCompetenceText = $('#nomCompetence').val(); //marche
-	if(!nomCompetenceText==null)
+	if(!nomCompetenceText=="")
 	{
-		console.log("skill creation request received!");
 		console.log("skill name = "+nomCompetenceText);
+		$.ajax({
+			type : 'POST',
+			url : serverAddress + "/api/skills?name="+nomCompetenceText+"&token="+token(),
+			
+			success : function(data,status){
+				if (data.success){
+					console.log("skill created successfuly");
+					renderElement();
+				}
+				else
+				{
+					console.log("skill creation failed");
+				}
+			}
+		});
 	}
 }
 
 function supprimerClasse(idClasse){
-	console.log("suppr classe");
-	console.log("suppresion classe " +idClasse);
+	//console.log("suppr classe");
+	//console.log("suppresion classe " +idClasse);
+	$.ajax({
+		type : 'DELETE',
+		url : serverAddress + "/api/classes/" + idClasse + "?token=" + token(),
+
+		success : function(data,status){
+			console.log(data);
+			if (data.success){
+				console.log("Class deletion successful");
+				renderElement();
+			}
+			else
+			{
+				console.log("Class deletion failed");
+			}
+		}
+	});
 }
 
 function supprimerProfesseur(idClasse){
 	console.log("suppresion prof " +idClasse);
+	$.ajax({
+		type : 'PUT',
+		url : serverAddress + "/api/classes/" + idClasse + "?teacher=null&token=" + token(),
+		
+		success : function(data,status){
+			if(data.success){
+				console.log("Teacher updated");
+				renderElement();
+			}
+			else{
+				console.log(data);
+				console.log("Error while changing teacher");
+			}
+		}
+	});
+	$.ajax({
+		
+	});
 }
 
 function ajouterProfesseur(idClasse){
 	console.log("ajout prof " +idClasse);
 	$.ajax({
 		type : 'GET',
-		//TODO : changer le endpoint
-		url : serverAddress + "/api/users/teachers?token=" + token(),
+		url : serverAddress + "/api/users/teachers?class=null&token=" + token(),
 
 		success : function(data, status){
 			if(data.success){
+				console.log(data);
 				var listeProfs = "";
 				for (var i=0; i< data.users.length;i++)
 				{
@@ -150,6 +213,19 @@ function ajouterProfesseur(idClasse){
 function choisirProfesseur(emailProf, idClasse){
 	$('#profListe').html("");
 	console.log(emailProf +"  new prof classe " + idClasse);
-	//TODO : appeler le endpoint
-	
+	$.ajax({
+		type : 'PUT',
+		url : serverAddress + "/api/classes/" + idClasse + "?teacher="+emailProf+"&token=" + token(),
+		
+		success : function(data,status){
+			if(data.success){
+				console.log("Teacher updated");
+				renderElement();
+			}
+			else{
+				console.log(data);
+				console.log("Error while changing teacher");
+			}
+		}
+	});
 }

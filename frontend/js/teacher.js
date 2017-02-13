@@ -11,7 +11,7 @@ function renderElement(){
 
 		success : function(data, status){
 			if(data.success){
-				var table = "<h1 class=\"page-header\">Students of " + data.user[0].firstname + " " + data.user[0].lastname + " - <a href=\"class.html?class=" + data.user[0].id + "\">" + data.user[0].name + "</a></h1>";
+				var table = "<h1 class=\"page-header\">Students of " + data.user[0].firstname + " " + data.user[0].lastname + " - <a href=\"class.html?class=" + data.user[0].class + "\">" + data.user[0].class + "</a></h1>";
 				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>First Name</th><th>Last Name</th></tr></thead>";
 				table = table + "<tbody>";
 				if(getToken().level==2){

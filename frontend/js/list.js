@@ -96,7 +96,7 @@ function renderStudentList(){
 					table = table + "<td>" + i + "</td>";
 					table = table + "<td><a href=\"student.html?student=" + data.users[i].email + "\">" + data.users[i].firstname + "</a></td>";
 					table = table + "<td><a href=\"student.html?student=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
-					table = table + "<td><a href=\"class.html?class=" + data.users[i].id + "\">"+ data.users[i].name + "</a></td>";
+					table = table + "<td><a href=\"class.html?class=" + data.users[i].class + "\">"+ data.users[i].class + "</a></td>";
 					table = table  + "</tr>";
 				}
 				table = table +  "</tbody></table></div>";
@@ -138,7 +138,7 @@ function renderTeachersList(){
 					table = table + "<td>" + i + "</td>";
 					table = table + "<td><a href=\"teacher.html?teacher=" + data.users[i].email + "\">" + data.users[i].firstname + "</a></td>";
 					table = table + "<td><a href=\"teacher.html?teacher=" + data.users[i].email + "\">" + data.users[i].lastname + "</a></td>";
-					table = table + "<td><a href=\"class.html?class=" + data.users[i].id + "\">"+ data.users[i].name + "</a></td>";
+					table = table + "<td><a href=\"class.html?class=" + data.users[i].class + "\">"+ data.users[i].class + "</a></td>";
 					table = table  + "</tr>";
 				}
 				table = table +  "</tbody></table></div>";
@@ -172,14 +172,15 @@ function renderClassesList(){
 
 		success : function(data, status){
 			if(data.success){
+				console.log(data);
 				var table = "<h2 class=\"sub-header\">List of the classes</h2>";
 				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Name</th><th>Teacher</th><th>Number of students</th></tr></thead>";
 				table = table + "<tbody>";
 				for (var i = 0; i < data.classes.length; i++){
 					table = table +  "<tr>";
 					table = table + "<td>" + i + "</td>";
-					table = table + "<td><a href=\"class.html?class=" + data.classes[i].id + "\">"+ data.classes[i].name + "</a></td>";
-					table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].teacher + "\">"+ data.classes[i].firstname + " " + data.classes[i].lastname + "</a></td>";
+					table = table + "<td><a href=\"class.html?class=" + data.classes[i].name + "\">"+ data.classes[i].name + "</a></td>";
+					table = table + "<td><a href=\"teacher.html?teacher=" + data.classes[i].email + "\">"+ data.classes[i].firstname + " " + data.classes[i].lastname + "</a></td>";
 					table = table + "<td>"+ data.classes[i].students + "</td>";
 					table = table  + "</tr>";
 				}

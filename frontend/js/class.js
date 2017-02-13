@@ -4,25 +4,26 @@ $(document).ready(function(){
 
 function renderElement(){
 	console.log("Function renderElement()");
-	var id = decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
+	var name = decodeURI(location.search.substring(location.search.lastIndexOf("=")+1));
+	console.log(name);
 	$.ajax({
 		type : 'GET',
-		url : serverAddress + "/api/classes/" + id + "?token=" + token(),
+		url : serverAddress + "/api/classes/" + name + "?token=" + token(),
 
 		success : function(data, status){
 			if(data.success){
 				var table = "<h2 class=\"sub-header\">" + data.class[0].name + "</h2>";
 				table = table + "<div class=\"table-responsive\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>First Name</th><th>Last Name</th></tr></thead>";
 				table = table + "<tbody>";
-				table = table + "<tr><td>Teacher</td><td><a href=\"teacher.html?teacher=" + data.class[0].teacher + "\"><b>" + data.class[0].firstname +"</b></a></td><td><a href=\"teacher.html?teacher=" + data.class[0].teacher + "\"><b>" + data.class[0].lastname +"</b></a></td></tr>";
-				
+				table = table + "<tr><td>Teacher</td><td><a href=\"teacher.html?teacher=" + data.class[0].email + "\"><b>" + data.class[0].firstname +"</b></a></td><td><a href=\"teacher.html?teacher=" + data.class[0].teacher + "\"><b>" + data.class[0].lastname +"</b></a></td></tr>";
+
 				if(getToken().level==2){
 					$('#dropDownMenu').append("<li role=\"separator\" class=\"divider\"></li><li><a href=\"admin.html\">Admin</a></li>");
 				}
-				
+
 				$.ajax({
 					type : 'GET',
-					url : serverAddress + "/api/classes/" + id +"/students?token=" + token(),
+					url : serverAddress + "/api/classes/" + name +"/students?token=" + token(),
 
 					success : function(data, status){
 						if(data.success){
