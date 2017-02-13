@@ -25,17 +25,14 @@ DROP TABLE IF EXISTS `attributions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `attributions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `student` varchar(255) NOT NULL,
-  `skill` int(11) NOT NULL,
-  `mark` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `users_fk_idx` (`student`),
-  KEY `skills_fk_idx` (`skill`),
-  CONSTRAINT `attributions_skills_fk` FOREIGN KEY (`skill`) REFERENCES `skills` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `attributions_users_fk` FOREIGN KEY (`student`) REFERENCES `users` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 KEY_BLOCK_SIZE=4;
+  `skill` varchar(255) NOT NULL,
+  `mark` int(11) DEFAULT NULL,
+  PRIMARY KEY (`student`,`skill`),
+  KEY `attributions_fk_skill_idx` (`skill`),
+  CONSTRAINT `attributions_fk_skill` FOREIGN KEY (`skill`) REFERENCES `skills` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attributions_fk_student` FOREIGN KEY (`student`) REFERENCES `users` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,7 +41,7 @@ CREATE TABLE `attributions` (
 
 LOCK TABLES `attributions` WRITE;
 /*!40000 ALTER TABLE `attributions` DISABLE KEYS */;
-INSERT INTO `attributions` VALUES (1,'dali.mersel@gmail.com',1,4),(2,'dali.mersel@gmail.com',2,3),(3,'dali.mersel@gmail.com',4,3),(6,'maxime.makhloufi@gmail.com',1,3),(7,'maxime.makhloufi@gmail.com',2,4),(8,'maxime.makhloufi@gmail.com',4,5);
+INSERT INTO `attributions` VALUES ('maxime.makhloufi@gmail.com','Anglais',5),('maxime.makhloufi@gmail.com','C++',4),('maxime.makhloufi@gmail.com','Java',3),('maxime.makhloufi@gmail.com','MySQL',4);
 /*!40000 ALTER TABLE `attributions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -56,11 +53,12 @@ DROP TABLE IF EXISTS `classes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `classes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `teacher` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`name`),
+  KEY `classes_fk_teacher_idx` (`teacher`),
+  CONSTRAINT `classes_fk_teacher` FOREIGN KEY (`teacher`) REFERENCES `users` (`email`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +67,7 @@ CREATE TABLE `classes` (
 
 LOCK TABLES `classes` WRITE;
 /*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,'FISE3',''),(2,'FISA3','jacques.fayolle@gmail.com');
+INSERT INTO `classes` VALUES ('FISE2','christophe.gravier@gmail.com'),('FISE1','frederique.laforest@gmail.com'),('FISE3','jacques.fayolle@gmail.com');
 /*!40000 ALTER TABLE `classes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -81,11 +79,9 @@ DROP TABLE IF EXISTS `skills`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `skills` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +90,7 @@ CREATE TABLE `skills` (
 
 LOCK TABLES `skills` WRITE;
 /*!40000 ALTER TABLE `skills` DISABLE KEYS */;
-INSERT INTO `skills` VALUES (6,'Anglais'),(4,'C'),(5,'C#'),(1,'C++'),(9,'Css'),(8,'Html'),(2,'Java'),(3,'Javascript'),(7,'Mathématiques'),(11,'MySQL'),(12,'PHP'),(10,'Réseau');
+INSERT INTO `skills` VALUES ('Anglais'),('C'),('C#'),('C++'),('Html'),('Java'),('Javascript'),('LoL'),('Mathématiques'),('MySQL'),('PHP'),('Réseau');
 /*!40000 ALTER TABLE `skills` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,11 +106,11 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `firstname` varchar(255) NOT NULL,
   `lastname` varchar(255) NOT NULL,
-  `class` int(11) DEFAULT NULL,
   `level` int(11) NOT NULL DEFAULT '0',
+  `class` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`email`),
-  KEY `classes_fk_idx` (`class`),
-  CONSTRAINT `users_classes_fk` FOREIGN KEY (`class`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `users_fk_class_idx` (`class`),
+  CONSTRAINT `users_fk_class` FOREIGN KEY (`class`) REFERENCES `classes` (`name`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -124,7 +120,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('admin@gmail.com','admintest','Admin','Admin',NULL,2),('christophe.gravier@gmail.com','123456','Christophe','Gravier',NULL,1),('dali.mersel@gmail.com','123456','Dali','Mersel',NULL,0),('fabien.forestier@gmail.com','123456','Fabien','Forestier',2,0),('guillaume.terpend@gmail.com','123456','Guillaume','Terpend',1,0),('jacques.fayolle@gmail.com','123456','Jacques','Fayolle',NULL,1),('maxime.makhloufi@gmail.com','123456','Maxime','Makhloufi',1,0),('oussama.boualem@gmail.com','123456','Oussama','Boualem',2,0),('robin.vanet@gmail.com','123456','Robin','Vanet',1,0);
+INSERT INTO `users` VALUES ('admin@gmail.com','admintest','Admin','Admin',2,NULL),('christophe.gravier@gmail.com','123456','Christophe','Gravier',1,'FISE2'),('dali.mersel@gmail.com','123456','Maxime','Makhloufi',0,'FISE3'),('fabien.forestier@gmail.com','123456','Fabien','Forestier',0,'FISE2'),('frederique.laforest@gmail.com','123456','Frederique','Laforest',1,'FISE1'),('guillaume.terpend@gmail.com','123456','Guillaume','Terpend',0,'FISE1'),('jacques.fayolle@gmail.com','123456','Jacques','Fayolle',1,'FISE3'),('maxime.makhloufi@gmail.com','123456','Maxime','Makhloufi',0,'FISE1'),('nicolas.rivat@gmail.com','123456','Nicolas','Rivat',0,NULL),('oussama.boualem@gmail.com','123456','Oussama','Boualem',0,'FISE3'),('robin.vanet@gmail.com','123456','Robin','Vanet',0,'FISE2'),('yann.carrio@gmail.com','123456','Yann','Carrio',0,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -137,4 +133,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-11 18:42:41
+-- Dump completed on 2017-02-13 21:21:59
