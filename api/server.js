@@ -155,19 +155,19 @@ apiRoutes.post('/users/students/:email/skills/:name', function(req, res) {
   var queryParams = [email, name, mark];
 
   if(req.decoded.level > 0){ // A student can't create a new mark
-    var query = "INSERT INTO Attributions (student, skill, mark) VALUES (?, ?, ?);";
-    connection.query(query, queryParams, function(err, data, fields){
-      if(err){
-        res.json({ success: false, message: 'Failed to create a new mark for this student.', error: err });
-      }
-      else{
-        res.json({ success: true, message: 'New mark attributed.' });
-      }
-    });
-  }
-  else{
-    res.json({ success: false, message: 'You are not allowed to create a new mark.' });
-  }
+  var query = "INSERT INTO Attributions (student, skill, mark) VALUES (?, ?, ?);";
+  connection.query(query, queryParams, function(err, data, fields){
+    if(err){
+      res.json({ success: false, message: 'Failed to create a new mark for this student.', error: err });
+    }
+    else{
+      res.json({ success: true, message: 'New mark attributed.' });
+    }
+  });
+}
+else{
+  res.json({ success: false, message: 'You are not allowed to create a new mark.' });
+}
 });
 
 ///// CLASSES /////
@@ -319,8 +319,16 @@ apiRoutes.get('/users/students/:email/skills', function(req, res) {
 ///// TEACHERS /////
 
 apiRoutes.get('/users/teachers', function(req, res) {
+  var class_ = req.query.class;
 
-  var query = "SELECT email, firstname, lastname, class FROM Users WHERE level = 1;";
+  console.log(class_);
+
+  if(class_ == "null"){
+    var query = "SELECT email, firstname, lastname, class FROM Users WHERE class IS NULL AND level = 1;"
+  }
+  else{
+    var query = "SELECT email, firstname, lastname, class FROM Users WHERE level = 1;";
+  }
   connection.query(query, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'Error. No teacher found.', error: err });
@@ -520,18 +528,18 @@ apiRoutes.put('/users/students/:email/skills/:name', function(req, res) {
 
   var query = "UPDATE Attributions SET mark = ? WHERE student = ? AND skill = ?;";
   if(req.decoded.level > 0){ // A student can't modify the mark of a student
-    connection.query(query, queryParams, function (err, data, fields) {
-      if (err){
-        res.json({ success: false, message: 'Error. User not found.', error: err });
-      }
-      else{
-        res.json({ success: true, message: 'Mark updated.' });
-      }
-    });
-  }
-  else{
-    res.json({ success: false, message: 'You are not allowed to modify this mark.' });
-  }
+  connection.query(query, queryParams, function (err, data, fields) {
+    if (err){
+      res.json({ success: false, message: 'Error. User not found.', error: err });
+    }
+    else{
+      res.json({ success: true, message: 'Mark updated.' });
+    }
+  });
+}
+else{
+  res.json({ success: false, message: 'You are not allowed to modify this mark.' });
+}
 });
 
 ///// CLASSES /////
@@ -539,18 +547,66 @@ apiRoutes.put('/users/students/:email/skills/:name', function(req, res) {
 apiRoutes.put('/classes/:name', function(req, res) {
   var name = req.params.name;
   var teacher = req.query.teacher;
-  var queryParams = [teacher, name];
-
-  var query = "UPDATE Classes SET teacher = ? WHERE name = ?;";
   if(req.decoded.level > 1){ // Only the admin can modify a class
-    connection.query(query, queryParams, function(err, data, fields){
-      if(err){
-        res.json({ success: false, message: 'Error. Class not found.', error: err });
-      }
-      else{
-        res.json({ success: true, message: 'Class updated.' });
-      }
-    });
+    if(teacher == "null"){
+      //Find the teacher and Set his class to null
+      var queryParams = [name];
+      var query = "SELECT * FROM Users WHERE level = 1 AND class = ?;";
+      connection.query(query, queryParams, function(err, data, fields){
+        if(err){
+          res.json({ success: false, message: 'Error. Teacher not found.', error: err });
+        }
+        else{
+          if(data.length){
+            console.log(data);
+            var queryParams = [data[0].email];
+            var query = "UPDATE Users SET class = NULL WHERE email = ?;";
+            connection.query(query, queryParams, function(err, data, fields){
+              if(err){
+                res.json({ success: false, message: 'Error. Teacher not found.', error: err });
+              }
+              else{
+                var queryParams = [name];
+                var query = "UPDATE Classes SET teacher = NULL WHERE name = ?;";
+                connection.query(query, queryParams, function(err, data, fields){
+                  if(err){
+                    res.json({ success: false, message: 'Error. Class not found.', error: err });
+                  }
+                  else{
+                    res.json({ success: true, message: 'Class and teacher updated.' });
+                  }
+                });
+              }
+            });
+          }
+          else{
+            res.json({ success: false, message: 'Error. Teacher not found.', error: err });
+          }
+
+        }
+      });
+    }
+    else{
+      var queryParams = [name, teacher];
+      var query = "UPDATE Users SET class = ? WHERE email = ?";
+      connection.query(query, queryParams, function(err, data, fields){
+        if(err){
+          res.json({ success: false, message: 'Error. Teacher not found.', error: err });
+        }
+        else{
+          queryParams = [teacher, name],
+          query = "UPDATE Classes SET teacher = ? WHERE name = ?;";
+          connection.query(query, queryParams, function(err, data, fields){
+            if(err){
+              res.json({ success: false, message: 'Error. Teacher not found.', error: err });
+            }
+            else{
+              res.json({ success: true, message: 'Class and teacher updated.' });
+            }
+          });
+        }
+      });
+    }
   }
   else{
     res.json({ success: false, message: 'You are not allowed to modify this class.' });
@@ -590,18 +646,18 @@ apiRoutes.delete('/users/students/:email/skills/:name', function(req, res) {
 
   var query = "DELETE FROM Attributions WHERE student = ? AND skill = ?;";
   if(req.decoded.level > 0){ // A student can't delete a mark
-    connection.query(query, queryParams, function(err, data, fields){
-      if(err){
-        res.json({ success: false, message: 'Error. User not found.', error: err });
-      }
-      else{
-        res.json({ success: true, message: 'Mark deleted.' });
-      }
-    });
-  }
-  else{
-    res.json({ success: false, message: 'You are not allowed to delete this mark.' });
-  }
+  connection.query(query, queryParams, function(err, data, fields){
+    if(err){
+      res.json({ success: false, message: 'Error. User not found.', error: err });
+    }
+    else{
+      res.json({ success: true, message: 'Mark deleted.' });
+    }
+  });
+}
+else{
+  res.json({ success: false, message: 'You are not allowed to delete this mark.' });
+}
 });
 
 ///// CLASSES /////
