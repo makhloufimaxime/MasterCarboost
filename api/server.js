@@ -67,7 +67,7 @@ apiRoutes.post('/signup', function(req, res) {
       // create a token
       var payload = {"email":email,"firstname":firstname,"lastname":lastname,"level":0,"class":null};
       var token = jwt.sign(payload, app.get('superSecret'), {
-        expiresIn: "2 days" // expires in 48 hours
+        expiresIn: "365 days" // expires in 48 hours
       });
       // return the information including token as JSON
       res.json({
@@ -400,7 +400,7 @@ apiRoutes.get('/users/teachers/:email/students', function(req, res) {
 
 apiRoutes.get('/classes', function(req, res) {
 
-  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Classes class LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users nbStudents ON class.name = nbStudents.class WHERE teacher.level = 1 AND nbStudents.level = 0 GROUP BY class.name;";
+  var query = "SELECT class.name, teacher.email, teacher.firstname, teacher.lastname, COUNT(nbStudents.email) as students FROM Classes class LEFT JOIN Users teacher ON class.teacher = teacher.email LEFT JOIN Users nbStudents ON class.name = nbStudents.class GROUP BY class.name;";
   connection.query(query, function (err, data, fields) {
     if (err){
       res.json({ success: false, message: 'Error. No class found.', error: err });
@@ -485,8 +485,14 @@ apiRoutes.put('/users/:email', function(req, res) {
     var query = "UPDATE Users SET level = ? WHERE email = ?;";
   }
   else{
-    var queryParams = [class_, email];
-    var query = "UPDATE Users SET class = ? WHERE email = ?;";
+    if(class_ == "null"){
+      var query = "UPDATE Users SET class = NULL WHERE email = ?;";
+      var queryParams = [email];
+    }
+    else{
+      var query = "UPDATE Users SET class = ? WHERE email = ?;";
+      var queryParams = [class_, email];
+    }
   }
 
   if(req.decoded.level > 1){ // Only the admin can modify an user
