@@ -11,10 +11,11 @@ function renderElement(){
 
 function signUp(){
 	console.log("Function signUp()");
-	var email = document.getElementById("inputEmail").value;
+	var email = document.getElementById("inputMail").value;
 	var firstname = document.getElementById("inputFirstName").value;
 	var lastname = document.getElementById("inputLastName").value;
-	var password = document.getElementById("inputPassword").value;
+	var password = document.getElementById("inputPass").value;
+	console.log(email + firstname + lastname + password);
 	if(email != "" && firstname != "" && lastname != "" && password != ""){
 		$.ajax({
 			type : 'POST',
